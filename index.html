@@ -189,6 +189,19 @@ thead th{font-weight:500;color:var(--muted);font-size:13px}
 button.reset{align-self:flex-start;font-size:14px;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;cursor:pointer}
 .howto{background:var(--sea-soft);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;font-size:15px}
 .howto b{color:var(--sea-deep)}
+[hidden]{display:none!important}
+.fab{width:58px;height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.fab svg{width:22px;height:22px}
+.fab .fl{font-size:11px;font-weight:700;line-height:1.2}
+.fab .big{font-size:17px;line-height:1.1}
+.me{width:22px;height:22px;position:relative}
+.me b{position:absolute;inset:0;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 0 0 9px rgba(26,115,232,.2),0 2px 6px rgba(0,0,0,.3)}
+.me .hd{display:none;position:absolute;left:50%;top:-17px;transform:translateX(-50%);width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:17px solid rgba(26,115,232,.55)}
+.notebox{background:var(--card);border:2px dashed var(--dc,var(--sea));border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.notebox label{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.notebox .saved{font-size:12px;color:var(--muted);font-weight:400}
+.notebox textarea{width:100%;font:inherit;font-size:16px;line-height:1.7;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;resize:none;min-height:88px;background:var(--bg);color:var(--ink)}
+.notebox textarea:focus{outline:none;border-color:var(--sea);background:#fff}
 </style>
 </head>
 <body>
@@ -200,9 +213,9 @@ button.reset{align-self:flex-start;font-size:14px;background:var(--card);border:
 </div>
 
 <div class="fabs">
-  <button type="button" class="fab" id="floc" aria-label="顯示我的位置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg></button>
-  <button type="button" class="fab on" id="f3d" aria-label="切換成平面地圖">3D</button>
-  <button type="button" class="fab" id="fall" aria-label="看這天的全部站點"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  <button type="button" class="fab" id="floc" aria-label="顯示我的位置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg><span class="fl">定位</span></button>
+  <button type="button" class="fab on" id="f3d" aria-label="切換成平面地圖"><span class="big">3D</span><span class="fl">立體</span></button>
+  <button type="button" class="fab" id="fall" aria-label="看這天的全部站點"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span class="fl">全站</span></button>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -810,7 +823,7 @@ button.reset{align-self:flex-start;font-size:14px;background:var(--card);border:
     <li>首里城、今歸仁城、浦添城三種文化資產保存方式的比較</li>
   </ul>
 
-  <button class="reset" type="button" id="reset">清除這支手機上的勾選與數字</button>
+  <button class="reset" type="button" id="reset">清除這支手機上的勾選、數字與筆記</button>
 </section>
 <section>
   <div class="day" id="ud"><h2>通用設計 UD</h2><span class="date">每天都能找</span><span class="prog" data-prog="ud"></span></div>
@@ -886,9 +899,9 @@ button.reset{align-self:flex-start;font-size:14px;background:var(--card);border:
 <h2>沖繩衛福觀察手冊</h2>
 <p class="lede">行程、景點介紹、五感觀察與思考題，加上能用上衛福專業的觀察清單。每一項都靠看、數、拍就能完成，沒有機會訪談也做得出成果。</p>
 <div class="howto"><b>怎麼用這張地圖</b>
-<p>右邊的圓形定位鈕會用手機定位，在地圖上以藍點標出你的位置和面向，每一站也會顯示離你多遠。</p>
+<p>右邊的「定位」會用手機定位，在地圖上以藍點標出你的位置，走路時會出現面向的箭頭，每一站也會顯示離你多遠。之後藍點會跟著你移動，地圖不會被拉走；想回到自己身上就再按一次。「全站」把地圖縮放到這一天所有的站。</p>
 <p>「3D」鈕切換立體與平面。兩指旋轉、兩指上下滑可以改變視角。點圖釘看是哪一站，用 ‹ › 換到上一站或下一站，「導航」會交給 Google 地圖。</p>
-<p>勾選紀錄與計數只存在這支手機上。</p></div>
+<p>上方切換日期，下面就顯示那天的行程。每天最上面有筆記框，打的字會自動存起來。勾選、計數與筆記只存在這支手機上，換手機或清除瀏覽器資料就會不見，記得用「記錄表」裡的「複製全部筆記」備份。</p></div>
 </section>
 <section id="frame">
   <div class="trip">
@@ -997,8 +1010,8 @@ const PTS=[{"k": "airport", "d": 1, "n": 1, "name": "那霸機場", "lat": 26.20
   var armed=false, rb=$('#reset');
   rb.addEventListener('click',function(){
     if(!armed){ armed=true; rb.textContent='再按一次確認清除'; return; }
-    state={}; save(); boxes.forEach(function(b){b.checked=false;}); nums.forEach(function(n){n.value='';});
-    armed=false; rb.textContent='清除這支手機上的勾選與數字'; progress();
+    state={}; save(); boxes.forEach(function(b){b.checked=false;}); nums.forEach(function(n){n.value='';}); $$('.notebox textarea').forEach(function(t){t.value='';});
+    armed=false; rb.textContent='清除這支手機上的勾選、數字與筆記'; progress();
   });
 
   /* ---------- 每一站卡片加上編號與距離 ---------- */
@@ -1009,6 +1022,36 @@ const PTS=[{"k": "airport", "d": 1, "n": 1, "name": "那霸機場", "lat": 26.20
     h.insertAdjacentHTML('beforeend','<span class="dist" data-k="'+p.k+'"></span>');
   });
   $$('.daysec').forEach(function(s){ s.style.setProperty('--dc',DC[s.getAttribute('data-d')]); });
+
+  /* ---------- 每日筆記 ---------- */
+  var GROW=[];
+  $$('.daysec').forEach(function(sec){
+    var d=sec.getAttribute('data-d'), id='note-d'+d;
+    var box=document.createElement('div'); box.className='notebox';
+    box.innerHTML='<label for="'+id+'"><b>我的 Day '+d+' 筆記</b><span class="saved" id="saved-'+d+'">'+(state[id]?'已存在這支手機':'')+'</span></label>'+
+      '<textarea id="'+id+'" rows="3" placeholder="今天看到、聽到、想到的……只會存在這支手機上"></textarea>';
+    sec.insertBefore(box,$('article',sec));
+    var ta=$('textarea',box); ta.value=state[id]||'';
+    function grow(){ if(!ta.offsetParent) return; ta.style.height='auto'; ta.style.height=Math.max(88,ta.scrollHeight+3)+'px'; }
+    GROW.push(grow);
+    ta.addEventListener('input',function(){ grow(); state[id]=ta.value; save();
+      var t=new Date(); $('#saved-'+d).textContent='已儲存 '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0'); });
+    ta.addEventListener('focus',function(){ if(!wide()) snap('full'); grow(); });
+  });
+  (function(){
+    var sec=document.createElement('section'); sec.className='facts';
+    sec.innerHTML='<h3>我的每日筆記</h3><p class="note">每天的筆記框在「行程」裡各天的最上面。這裡可以一次複製五天的筆記，貼到報告、記事本或 LINE。</p>'+
+      '<button type="button" class="btn pri" id="copynotes" style="align-self:flex-start;flex:none">複製全部筆記</button>';
+    var pane=$('#pane-log'); pane.insertBefore(sec,pane.firstChild);
+    $('#copynotes').addEventListener('click',function(){
+      var txt=[1,2,3,4,5].map(function(d){ var v=(state['note-d'+d]||'').trim();
+        return 'Day '+d+'（'+DATES[d].slice(5).replace('-','/')+'）'+TITLE[d]+'\n'+(v||'（沒有筆記）'); }).join('\n\n');
+      function fb(){ var t=document.createElement('textarea'); t.value=txt; t.setAttribute('readonly',''); t.style.position='fixed'; t.style.opacity='0';
+        document.body.appendChild(t); t.select(); var ok=false; try{ ok=document.execCommand('copy'); }catch(e){} t.remove();
+        toast(ok?'已複製五天的筆記':'無法自動複製，請到各天的筆記框手動複製。'); }
+      if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function(){ toast('已複製五天的筆記'); },fb); else fb();
+    });
+  })();
 
   /* ---------- 狀態 ---------- */
   var today=(function(){ var d=new Date(), s=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -1025,12 +1068,12 @@ const PTS=[{"k": "airport", "d": 1, "n": 1, "name": "那霸機場", "lat": 26.20
   var sheet=$('#sheet'), grab=$('#grab'), panel=$('#panel'), cur='peek', snaps=null;
   function wide(){ return window.matchMedia('(min-width:900px)').matches; }
   function measure(){ var H=sheet.offsetHeight, ph=grab.offsetHeight+8;
-    snaps={peek:Math.max(0,H-ph), half:Math.max(0,H-Math.round(window.innerHeight*0.55)), full:0};
+    snaps={peek:Math.max(0,H-ph), half:Math.max(0,H-Math.round(window.innerHeight*0.46)), full:0};
     if(snaps.half>snaps.peek) snaps.half=snaps.peek; }
   function snap(n){ cur=n; if(wide()){ sheet.style.transform=''; return; } measure(); sheet.style.transform='translateY('+snaps[n]+'px)'; }
   function visible(){ if(wide()||!snaps) return 0; return sheet.offsetHeight-snaps[cur]; }
   function pad(){ if(wide()) return {top:110,bottom:40,left:480,right:90};
-    return {top:150,bottom:Math.min(visible(),window.innerHeight*0.6)+20,left:30,right:80}; }
+    return {top:150,bottom:Math.min(visible(),window.innerHeight*0.48)+16,left:30,right:84}; }
   var drag=null;
   grab.addEventListener('pointerdown',function(e){
     if(wide()||e.target.closest('button,a,input')) return;
@@ -1085,9 +1128,13 @@ const PTS=[{"k": "airport", "d": 1, "n": 1, "name": "那霸機場", "lat": 26.20
     $$('.daysec').forEach(function(s){ s.hidden=!!d && +s.getAttribute('data-d')!==d; });
     PTS.forEach(function(p){ if(MK[p.k]) MK[p.k].getElement().style.display=(!d||p.d===d)?'':'none'; });
     if(sel && d && byK(sel).d!==d) select(null);
-    updateRoutes(); renderPeek(); if(fit) fitPts(shown());
+    updateRoutes(); renderPeek(); GROW.forEach(function(g){g();}); if(fit) fitPts(shown());
   }
-  $$('.chip[data-day]').forEach(function(b){ b.addEventListener('click',function(){ setDay(+b.getAttribute('data-day'),true); }); });
+  $$('.chip[data-day]').forEach(function(b){ b.addEventListener('click',function(){
+    var d=+b.getAttribute('data-day'); if(sel) select(null);
+    setTab('trip'); if(cur==='peek') snap('half'); setDay(d,true); panel.scrollTop=0;
+    b.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+  }); });
 
   /* ---------- 選取一站 ---------- */
   function select(k,fly){
@@ -1113,14 +1160,20 @@ const PTS=[{"k": "airport", "d": 1, "n": 1, "name": "那霸機場", "lat": 26.20
   function toast(msg){ var t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},3500); }
   function fitPts(pts){ if(!map||!pts.length) return; var b=[180,90,-180,-90];
     pts.forEach(function(p){b[0]=Math.min(b[0],p.lng);b[1]=Math.min(b[1],p.lat);b[2]=Math.max(b[2],p.lng);b[3]=Math.max(b[3],p.lat);});
-    if(b[2]-b[0]<0.004){b[0]-=0.004;b[2]+=0.004;b[1]-=0.003;b[3]+=0.003;}
-    map.fitBounds([[b[0],b[1]],[b[2],b[3]]],{padding:pad(),maxZoom:17.3,pitch:is3D?50:0,duration:1200}); }
+    var gx=Math.max(0.0006,(b[2]-b[0])*0.08), gy=Math.max(0.0005,(b[3]-b[1])*0.08); b[0]-=gx;b[2]+=gx;b[1]-=gy;b[3]+=gy;
+    function mx(lng){return (lng+180)/360;} function my(lat){var r=lat*Math.PI/180;return (1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2;}
+    var P=pad(), c=map.getContainer(), W=c.clientWidth-P.left-P.right, H=c.clientHeight-P.top-P.bottom;
+    var dx=Math.max(1e-9,mx(b[2])-mx(b[0])), dy=Math.max(1e-9,my(b[1])-my(b[3]));
+    var z=Math.log(Math.min(Math.max(60,W)/(dx*512),Math.max(60,H)/(dy*512)))/Math.LN2;
+    var wideBox=b[3]-b[1]>0.05, pitch=is3D?(wideBox?35:50):0;
+    z=Math.min(17.3,z-(is3D?(wideBox?0.45:0.3):0)-(Math.abs(map.getBearing())>5?0.3:0));
+    map.flyTo({center:[(b[0]+b[2])/2,(b[1]+b[3])/2],zoom:z,pitch:pitch,padding:P,duration:1200,essential:true}); }
   function routes(){ var f=[]; [1,2,3,4,5].forEach(function(d){ var c=PTS.filter(function(p){return p.d===d;}).map(function(p){return [p.lng,p.lat];});
       if(c.length>1) f.push({type:'Feature',properties:{c:DC[d],o:(!day||day===d)?(day?0.9:0.55):0},geometry:{type:'LineString',coordinates:c}}); });
     return {type:'FeatureCollection',features:f}; }
   function updateRoutes(){ if(map&&map.getSource&&map.getSource('routes')) map.getSource('routes').setData(routes()); }
   function apply3D(){
-    var b=$('#f3d'); b.textContent=is3D?'3D':'2D'; b.classList.toggle('on',is3D); b.setAttribute('aria-label',is3D?'切換成平面地圖':'切換成立體地圖');
+    var b=$('#f3d'); b.querySelector('.big').textContent=is3D?'3D':'2D'; b.querySelector('.fl').textContent=is3D?'立體':'平面'; b.classList.toggle('on',is3D); b.setAttribute('aria-label',is3D?'切換成平面地圖':'切換成立體地圖');
     if(!map) return;
     try{ map.setTerrain(is3D&&map.getSource('dem')?{source:'dem',exaggeration:1.5}:null); }catch(e){}
     map.easeTo({pitch:is3D?60:0,bearing:is3D?(map.getBearing()||-18):0,duration:900,padding:pad()});
@@ -1149,9 +1202,8 @@ const PTS=[{"k": "airport", "d": 1, "n": 1, "name": "那霸機場", "lat": 26.20
   else try{
     map=new maplibregl.Map({container:'map',style:'https://tiles.openfreemap.org/styles/liberty',center:[127.69,26.214],zoom:13.5,pitch:55,bearing:-18,maxPitch:75,attributionControl:false});
     map.addControl(new maplibregl.AttributionControl({compact:true}),'top-right');
-    geo=new maplibregl.GeolocateControl({positionOptions:{enableHighAccuracy:true},trackUserLocation:true,showUserHeading:true,showAccuracyCircle:true,fitBoundsOptions:{maxZoom:16.5}});
-    map.addControl(geo,'bottom-right');
     map.on('load',setup);
+    map.once('load',function(){ setTimeout(function(){ [].forEach.call(document.querySelectorAll('.maplibregl-ctrl-attrib'),function(e){e.classList.remove('maplibregl-compact-show');}); },2500); });
     map.once('idle',function(){ [].forEach.call(document.querySelectorAll('.maplibregl-ctrl-attrib'),function(e){e.classList.remove('maplibregl-compact-show');}); });
     map.on('error',function(e){ if(window.console) console.warn(e&&e.error); });
     map.on('click',function(e){ var t=e.originalEvent&&e.originalEvent.target; if(t&&t.closest&&t.closest('.mk')) return; if(sel){ select(null); } });
@@ -1163,19 +1215,29 @@ const PTS=[{"k": "airport", "d": 1, "n": 1, "name": "那霸機場", "lat": 26.20
       MK[p.k]=new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat([p.lng,p.lat]).addTo(map);
       el.setAttribute('aria-label','Day '+p.d+' 第 '+p.n+' 站 '+p.name);
     });
-    var lf=$('#floc');
-    geo.on('geolocate',function(e){ me=[e.coords.longitude,e.coords.latitude]; lf.classList.remove('wait'); lf.classList.add('on'); updateDist(); });
-    geo.on('trackuserlocationstart',function(){ lf.classList.add('on'); });
-    geo.on('trackuserlocationend',function(){ lf.classList.remove('on'); });
-    geo.on('error',function(e){ lf.classList.remove('wait','on');
-      toast(e&&e.code===1?'定位被拒絕了。請到手機或瀏覽器設定，允許這個網站使用位置。':'暫時抓不到位置，請到戶外或稍後再試。'); });
   }catch(e){ mapFail(); }
 
-  $('#floc').addEventListener('click',function(){
-    if(!geo){ toast('地圖沒有載入，無法顯示位置。'); return; }
+  var watchId=null, meMk=null, centerNext=false, lf=$('#floc');
+  function centerMe(){ if(me&&map) map.flyTo({center:me,zoom:Math.max(map.getZoom(),16),pitch:is3D?60:0,padding:pad(),duration:1200,essential:true}); }
+  lf.addEventListener('click',function(){
     if(!navigator.geolocation){ toast('這個瀏覽器不支援定位。'); return; }
-    if(!me) this.classList.add('wait');
-    try{ geo.trigger(); }catch(e){ toast('地圖還在載入，請稍候再按一次。'); this.classList.remove('wait'); }
+    if(watchId!==null){ if(me) centerMe(); else toast('還在找你的位置，請稍候。'); return; }
+    lf.classList.add('wait'); centerNext=true;
+    watchId=navigator.geolocation.watchPosition(function(pos){
+      me=[pos.coords.longitude,pos.coords.latitude]; lf.classList.remove('wait'); lf.classList.add('on');
+      if(map){
+        if(!meMk){ var e=document.createElement('div'); e.className='me'; e.innerHTML='<i class="hd"></i><b></b>';
+          meMk=new maplibregl.Marker({element:e,rotationAlignment:'map'}).setLngLat(me).addTo(map); }
+        else meMk.setLngLat(me);
+        var h=pos.coords.heading, hd=meMk.getElement().querySelector('.hd');
+        if(h!==null&&h!==undefined&&!isNaN(h)&&pos.coords.speed>0.5){ hd.style.display='block'; meMk.setRotation(h); } else hd.style.display='none';
+        if(centerNext){ centerNext=false; centerMe(); }
+      }
+      updateDist();
+    },function(err){
+      lf.classList.remove('wait','on'); if(watchId!==null) navigator.geolocation.clearWatch(watchId); watchId=null;
+      toast(err.code===1?'定位被拒絕了。請到「設定 → 隱私權 → 定位服務 → Safari」允許使用位置，再按一次。':'暫時抓不到位置，請到戶外或稍後再試。');
+    },{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
   });
   $('#f3d').addEventListener('click',function(){ is3D=!is3D; apply3D(); });
   $('#fall').addEventListener('click',function(){ fitPts(shown()); });
