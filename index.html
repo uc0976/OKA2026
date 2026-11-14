@@ -3,254 +3,223 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f3fafb">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>沖繩衛福觀察手冊</title>
+<meta name="description" content="臺北市立大學衛生福利學系 2026 沖繩移地教學：3D 行程地圖、即時位置、五感與衛福觀察清單。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
-/* 版面想法：手機單欄的田野手冊。每一站是一張卡：衛福主軸標籤、課程主題、介紹、可勾選的衛福觀察、五感觀察、思考題。 */
+/* 版面想法：全螢幕 3D 地圖是主角；手機上資訊收在可上下拉的抽屜，桌機上變成左側面板。配色取沖繩的海、珊瑚與陽光，整體明亮。 */
 :root{
-  --bg:#f2f5f9; --surface:#ffffff; --ink:#12263f; --muted:#56667b; --line:#d4dde8;
-  --accent:#1f5fae; --accent-soft:#e3ecf8; --warn-bg:#fff3e6; --warn:#8a4b08;
-  --ax-food:#1f5fae; --ax-age:#0b7680; --ax-soc:#5a4db3; --ax-ud:#96500f;
-  --hp:#b8325c; --hp-soft:#fbe7ee; --bad:#5d5850; --bad-soft:#ece9e4;
-  --sea:#dbe7f2; --landc:#f6f3ea; --coast:#9fb3c8;
-  --display:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --bg:#f3fafb; --card:#ffffff; --ink:#0f2d3f; --muted:#587184; --line:#dbe9ee;
+  --sea:#0a9fb3; --sea-deep:#077a8a; --sea-soft:#e0f5f7;
+  --coral:#ef5a4c; --coral-soft:#ffeceA; --sun:#ffc94a; --sun-soft:#fff5d9; --warn:#8a5200;
+  --ax-food:#e0523d; --ax-age:#0a8f8a; --ax-soc:#7a5cd6; --ax-ud:#c47400;
+  --d1:#1689d6; --d2:#ef5a4c; --d3:#8a5cf0; --d4:#2a9d55; --d5:#e38b00;
+  --shadow:0 6px 24px rgba(15,45,63,.16);
+  --display:"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
   --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
   color-scheme:light;
 }
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --bg:#0d1622; --surface:#152233; --ink:#e6edf5; --muted:#9fb0c3; --line:#27394e;
-    --accent:#7fb2f0; --accent-soft:#1b2f48; --warn-bg:#3a2a14; --warn:#f3c487;
-    --ax-food:#7fb2f0; --ax-age:#5fc6cf; --ax-soc:#ada4f2; --ax-ud:#f0b070;
-    --hp:#f28aab; --hp-soft:#3a1f2a; --bad:#c9c3ba; --bad-soft:#2a2724;
-    --sea:#0f2235; --landc:#22313f; --coast:#3d5a75;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0d1622; --surface:#152233; --ink:#e6edf5; --muted:#9fb0c3; --line:#27394e;
-  --accent:#7fb2f0; --accent-soft:#1b2f48; --warn-bg:#3a2a14; --warn:#f3c487;
-  --ax-food:#7fb2f0; --ax-age:#5fc6cf; --ax-soc:#ada4f2; --ax-ud:#f0b070;
-  --hp:#f28aab; --hp-soft:#3a1f2a; --bad:#c9c3ba; --bad-soft:#2a2724;
-  --sea:#0f2235; --landc:#22313f; --coast:#3d5a75;
-  color-scheme:dark;
-}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.75}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
-.wrap{max-width:720px;margin:0 auto;padding:0 18px 64px;display:flex;flex-direction:column;gap:28px}
-header{padding-top:32px;display:flex;flex-direction:column;gap:10px}
-.eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em}
-h1{font-family:var(--display);font-weight:900;font-size:34px;line-height:1.25;margin:0;text-wrap:balance}
-.lede{margin:0;color:var(--muted);max-width:34em}
-h2{font-family:var(--display);font-weight:900;font-size:23px;line-height:1.35;margin:0;text-wrap:balance}
-h3{font-size:18px;font-weight:700;line-height:1.4;margin:0}
+html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit}
+a{color:var(--sea-deep)}
+:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
 p{margin:0}
-a{color:var(--accent)}
-a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* 地圖 */
+#map{position:fixed;inset:0;background:linear-gradient(#cdeef3,#eaf7f9)}
+.mapfail{position:absolute;inset:0;display:grid;place-items:center;padding:0 24px 40vh;text-align:center;color:var(--muted);font-size:15px}
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl-geolocate{display:none}
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl-group:has(.maplibregl-ctrl-geolocate){display:none}
+.maplibregl-ctrl-top-right{top:calc(env(safe-area-inset-top,0px) + 108px)}
+
+/* 頂部 */
+.top{position:fixed;top:0;left:0;right:0;z-index:5;padding:calc(env(safe-area-inset-top,0px) + 10px) max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.top>*{pointer-events:auto}
+.brand{align-self:flex-start;display:flex;align-items:center;gap:10px;background:var(--card);border-radius:16px;padding:7px 14px 7px 8px;box-shadow:var(--shadow);max-width:100%}
+.brand .logo{flex:none;width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--sea),#38c9b8);display:grid;place-items:center}
+.brand b{display:block;font-family:var(--display);font-size:17px;line-height:1.2;font-weight:400}
+.brand small{display:block;font-size:12.5px;color:var(--muted);line-height:1.3}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -12px;padding:2px 12px 6px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:flex;align-items:center;gap:6px;border:0;background:var(--card);border-radius:999px;padding:6px 13px;font-size:14px;font-weight:500;box-shadow:0 2px 10px rgba(15,45,63,.12);cursor:pointer;min-height:36px}
+.chip i{width:10px;height:10px;border-radius:50%;background:var(--dc,var(--sea))}
+.chip small{color:var(--muted);font-size:12px;font-weight:400}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff}
+.chip[aria-pressed="true"] small{color:#cfe3ec}
+.chip[aria-pressed="true"] i{box-shadow:0 0 0 2px #fff}
+
+/* 右側按鈕 */
+.fabs{position:fixed;z-index:5;right:max(12px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 150px);display:flex;flex-direction:column;gap:10px}
+.fab{width:50px;height:50px;border-radius:16px;border:0;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;cursor:pointer;font-weight:700;font-size:15px;color:var(--ink)}
+.fab svg{width:24px;height:24px}
+.fab.on{background:var(--sea);color:#fff}
+.fab.wait svg{animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.fab.wait svg{animation:none}}
+
+/* 圖釘 */
+.mk{border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.mk .nm{display:none;margin-bottom:4px;background:var(--ink);color:#fff;font-size:12.5px;font-weight:700;border-radius:8px;padding:2px 8px;white-space:nowrap;max-width:62vw;overflow:hidden;text-overflow:ellipsis}
+.mk .pin{position:relative;width:32px;height:32px;border-radius:50%;background:var(--dc);color:#fff;font:700 14px/1 var(--body);display:grid;place-items:center;border:3px solid #fff;box-shadow:0 3px 8px rgba(0,0,0,.3);margin-bottom:7px;transition:transform .2s}
+.mk .pin::after{content:"";position:absolute;left:50%;bottom:-10px;transform:translateX(-50%);border:6px solid transparent;border-top:7px solid #fff}
+.mk.sel .nm{display:block}
+.mk.sel .pin{transform:scale(1.25);transform-origin:50% 100%}
+
+/* 抽屜 */
+.sheet{position:fixed;z-index:6;left:0;right:0;bottom:0;height:calc(100% - env(safe-area-inset-top,0px) - 56px);background:var(--card);border-radius:24px 24px 0 0;box-shadow:0 -6px 30px rgba(15,45,63,.18);display:flex;flex-direction:column;transform:translateY(calc(100% - 190px));transition:transform .32s cubic-bezier(.2,.8,.2,1);will-change:transform}
+.sheet.dragging{transition:none}
+.grab{flex:none;padding:8px max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));touch-action:none;cursor:grab;display:flex;flex-direction:column;gap:10px}
+.handle{align-self:center;width:44px;height:5px;border-radius:3px;background:#c5d6dd}
+.peek{display:flex;flex-direction:column;gap:6px;min-height:70px}
+.pk-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pk-day{font-size:12.5px;font-weight:700;color:#fff;background:var(--dc,var(--sea));border-radius:6px;padding:1px 8px}
+.pk-dist{font-size:13px;color:var(--sea-deep);font-weight:700;font-variant-numeric:tabular-nums}
+.pk-name{font-family:var(--display);font-size:21px;line-height:1.3}
+.pk-sub{font-size:14px;color:var(--muted)}
+.pk-act{display:flex;gap:8px;align-items:center}
+.btn{border:0;border-radius:12px;min-height:42px;padding:0 14px;font-size:14.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;white-space:nowrap}
+.btn.pri{background:var(--sea);color:#fff;flex:1}
+.btn.sec{background:var(--sea-soft);color:var(--sea-deep)}
+.btn.ico{width:42px;padding:0;background:var(--bg);color:var(--ink);font-size:20px}
+.btn:disabled{opacity:.35;cursor:default}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:0 -16px;padding:0 12px}
+.tab{flex:1;border:0;background:none;padding:10px 4px 9px;font-size:14.5px;font-weight:500;color:var(--muted);border-bottom:3px solid transparent;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);font-weight:700;border-bottom-color:var(--sea)}
+.panel{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(40px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:var(--bg)}
+.pane{display:flex;flex-direction:column;gap:22px}
+.pane[hidden]{display:none}
+
+.toast{position:fixed;z-index:8;left:50%;top:calc(env(safe-area-inset-top,0px) + 108px);transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:12px;padding:9px 14px;font-size:14px;max-width:calc(100% - 32px);box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s}
+.toast.show{opacity:1}
+
+/* 桌機：左側面板 */
+@media (min-width:900px){
+  .sheet{left:16px;right:auto;top:16px;bottom:16px;width:440px;height:auto;border-radius:24px;transform:none!important;transition:none}
+  .grab{cursor:default;padding-top:14px}
+  .handle{display:none}
+  .top{left:472px}
+  .toast{left:calc(50% + 236px)}
+}
+
+/* 內容樣式 */
 section{display:flex;flex-direction:column;gap:14px}
-
-nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin:0 -18px;padding:8px 18px;display:flex;gap:8px;overflow-x:auto}
-nav a{flex:none;text-decoration:none;font-size:14px;font-weight:500;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 13px}
-
-.trip{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-.trip div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:14.5px;line-height:1.6}
+h2{font-family:var(--display);font-weight:400;font-size:23px;line-height:1.35;margin:0;text-wrap:balance}
+h3{font-size:18px;font-weight:700;line-height:1.4;margin:0}
+.eyebrow{font-size:13px;color:var(--muted);letter-spacing:.04em}
+.lede{color:var(--muted)}
+.day{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding-bottom:8px;border-bottom:3px solid var(--dc,var(--sea))}
+.day .date{font-size:14px;color:var(--muted)}
+.day .prog{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--sea-deep);background:var(--sea-soft);border-radius:999px;padding:1px 10px;font-variant-numeric:tabular-nums}
+.day .prog:empty{display:none}
+.daysub{font-size:15px}
+.wx{font-size:13.5px;color:var(--muted);background:var(--card);border-radius:10px;padding:6px 10px;align-self:flex-start}
+.warn{font-size:14.5px;background:var(--sun-soft);color:var(--warn);border-radius:12px;padding:10px 13px;line-height:1.65}
+.stop{background:var(--card);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 2px 10px rgba(15,45,63,.06);scroll-margin-top:12px;border:2px solid transparent;transition:border-color .2s}
+.stop.key{border-color:var(--sun)}
+.stop.cur{border-color:var(--sea)}
+.stop h3{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.stop h3 .n{flex:none;align-self:center;width:26px;height:26px;border-radius:50%;background:var(--dc);color:#fff;font-size:13px;display:grid;place-items:center}
+.stop h3 .dist{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--sea-deep);font-variant-numeric:tabular-nums}
+.tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tag{font-size:12px;font-weight:700;color:#fff;background:var(--c);border-radius:6px;padding:0 8px;line-height:1.9}
+.food{--c:var(--ax-food)} .age{--c:var(--ax-age)} .soc{--c:var(--ax-soc)} .ud{--c:var(--ax-ud)}
+.th{font-size:12px;color:var(--muted);background:var(--bg);border-radius:6px;padding:0 8px;line-height:1.9}
+.sug{font-size:12px;font-weight:700;color:var(--warn);background:var(--sun-soft);border-radius:6px;padding:0 8px;line-height:1.9}
+.ja{font-size:13.5px;color:var(--muted);line-height:1.6;margin-top:-6px}
+.go{display:flex;gap:8px;flex-wrap:wrap}
+.go a,.go button{font-size:13.5px;font-weight:500;text-decoration:none;color:var(--sea-deep);background:var(--sea-soft);border:0;border-radius:999px;padding:5px 12px;cursor:pointer;min-height:34px;display:inline-flex;align-items:center}
+.go .onmap{background:var(--sea);color:#fff;font-weight:700}
+.intro{font-size:15px;line-height:1.8}
+.lab{font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;border-top:1px dashed var(--line);padding-top:10px}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.checks label{display:flex;gap:12px;align-items:flex-start;padding:8px 0;cursor:pointer;font-size:15.5px;line-height:1.6}
+.checks input{flex:none;width:22px;height:22px;margin-top:2px;accent-color:var(--sea)}
+.checks input:checked + span{color:var(--muted);text-decoration:line-through}
+.senses{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.senses li{display:flex;gap:10px;align-items:flex-start;font-size:15px;line-height:1.65}
+.sense{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12.5px;font-weight:700;background:var(--sea-soft);color:var(--sea-deep);margin-top:1px}
+.qs{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:5px;font-size:15px;line-height:1.7}
+.tw{font-size:14px;background:var(--coral-soft);border-radius:12px;padding:9px 13px;line-height:1.65}
+.tw b{color:var(--coral)}
+.note{font-size:13px;color:var(--muted);line-height:1.6}
+.trip,.axes{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.trip div{background:var(--card);border-radius:14px;padding:10px 14px;font-size:14.5px;line-height:1.6}
 .trip b{display:block;font-size:13px;color:var(--muted);font-weight:500}
-
-.axes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-.axis{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.axis{background:var(--card);border-radius:14px;border-top:5px solid var(--c);padding:12px 14px;display:flex;flex-direction:column;gap:4px}
 .axis b{color:var(--c)}
 .axis span{font-size:14px;color:var(--muted);line-height:1.6}
-.food{--c:var(--ax-food)} .age{--c:var(--ax-age)} .soc{--c:var(--ax-soc)} .ud{--c:var(--ax-ud)}
-
-.facts{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.legend span{display:flex;gap:6px;align-items:center}
+.facts{background:var(--card);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.facts ul{margin:0;padding-left:1.2em;font-size:15px}
 .scroll{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:15px}
 th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
 thead th{font-weight:500;color:var(--muted);font-size:13px}
-.note{font-size:13px;color:var(--muted);line-height:1.6}
-.facts ul{margin:0;padding-left:1.2em;font-size:15px}
-
-.day{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:6px;scroll-margin-top:60px}
-.day .date{font-size:14px;color:var(--muted)}
-.day .prog{margin-left:auto;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
-.daysub{font-size:15px}
-.wx{font-size:13.5px;color:var(--muted)}
-.warn{font-size:14.5px;background:var(--warn-bg);color:var(--warn);border-radius:6px;padding:9px 12px;line-height:1.65}
-
-.stop{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:10px;scroll-margin-top:60px}
-.stop.key{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
-.tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.tag{font-size:12px;font-weight:700;color:var(--c);border:1px solid var(--c);border-radius:4px;padding:0 7px;line-height:1.8}
-.th{font-size:12px;color:var(--muted);background:var(--bg);border-radius:4px;padding:0 7px;line-height:1.9}
-.sug{font-size:12px;font-weight:700;color:var(--warn);background:var(--warn-bg);border-radius:4px;padding:0 7px;line-height:1.9}
-.ja{font-size:13.5px;color:var(--muted);line-height:1.6;margin-top:-6px}
-.intro{font-size:15px;line-height:1.8}
-.lab{font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;border-top:1px solid var(--line);padding-top:10px}
-.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
-.checks label{display:flex;gap:10px;align-items:flex-start;padding:7px 0;cursor:pointer;font-size:15.5px;line-height:1.6}
-.checks input{flex:none;width:20px;height:20px;margin-top:3px;accent-color:var(--accent)}
-.checks input:checked + span{color:var(--muted);text-decoration:line-through}
-.senses{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
-.senses li{display:flex;gap:10px;align-items:flex-start;font-size:15px;line-height:1.65}
-.sense{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12.5px;font-weight:700;background:var(--accent-soft);color:var(--accent);margin-top:1px}
-.qs{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:5px;font-size:15px;line-height:1.7}
-.tw{font-size:14px;background:var(--accent-soft);border-radius:6px;padding:8px 12px;line-height:1.65}
-.tw b{color:var(--accent)}
-
-.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
-.legend span{display:flex;gap:6px;align-items:center}
-
+.plain{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;font-size:15.5px}
 .eats{display:flex;flex-direction:column;gap:10px}
-.eat{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--hp);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
-.eat.bad{border-left-color:var(--bad)}
+.eat{background:var(--card);border-radius:16px;padding:13px 15px;display:flex;flex-direction:column;gap:6px;border-left:5px solid var(--coral)}
+.eat.bad{border-left-color:#8a857c}
 .eathead{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.et{font-size:12.5px;font-weight:700;color:#fff;background:var(--hp);border-radius:4px;padding:0 7px;line-height:1.9}
-.et.bad{background:var(--bad);color:var(--surface)}
-.dchip{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 8px;line-height:1.8;font-variant-numeric:tabular-nums;flex:none}
+.et{font-size:12.5px;font-weight:700;color:#fff;background:var(--coral);border-radius:6px;padding:0 8px;line-height:1.9}
+.et.bad{background:#6d675f}
+.dchip{font-size:12px;color:var(--muted);background:var(--bg);border-radius:999px;padding:0 9px;line-height:1.9;font-variant-numeric:tabular-nums;flex:none}
 .eathead .dchip{margin-left:auto}
-.say{font-size:14.5px;line-height:1.7;background:var(--hp-soft);border-radius:6px;padding:7px 10px}
-.say.bad{background:var(--bad-soft)}
+.say{font-size:14.5px;line-height:1.7;background:var(--coral-soft);border-radius:10px;padding:7px 10px}
+.say.bad{background:#efece7}
 .tip{font-size:14px}
 .srcl{font-size:12.5px;color:var(--muted);word-break:break-word}
 .shop{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-.shop li{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+.shop li{display:flex;gap:10px;align-items:flex-start;background:var(--card);border-radius:14px;padding:10px 14px}
 .shop li div{display:flex;flex-direction:column;font-size:14px;line-height:1.6;min-width:0}
 .shop li span:not(.dchip){color:var(--muted)}
-
-.count input{width:64px;font:inherit;font-variant-numeric:tabular-nums;text-align:right;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
-.plain{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;font-size:15.5px}
-.phr{display:grid;grid-template-columns:1fr;gap:8px}
-.phr div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+.count input{width:68px;font:inherit;font-variant-numeric:tabular-nums;text-align:right;padding:6px 8px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.phr{display:grid;gap:8px}
+.phr div{background:var(--card);border-radius:14px;padding:10px 14px}
 .phr span{display:block;font-size:13px;color:var(--muted)}
 .src{font-size:14px;padding-left:1.2em;margin:0;display:flex;flex-direction:column;gap:4px;word-break:break-word}
-button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
-
-.mapbox{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
-.mapbar{display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--line)}
-.mapbar button,.go button{font:inherit;font-size:13.5px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 11px;cursor:pointer}
-.mapbar button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.mapbar .sp{flex-basis:100%;height:0}
-#gmap{width:100%;height:min(60vh,460px);background:var(--sea)}
-#gmap .mapfail{padding:24px;font-size:14px;color:var(--muted)}
-.mk{width:28px;height:28px;border-radius:50%;background:var(--dc);color:#fff;display:grid;place-items:center;font:700 13px var(--body);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);cursor:pointer}
-.mk.sel{width:34px;height:34px;font-size:15px;box-shadow:0 0 0 3px var(--ink)}
-.me{width:16px;height:16px;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 0 0 7px rgba(26,115,232,.25)}
-.maplist .dist{margin-left:auto;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
-.mapinfo{padding:10px 14px;border-top:1px solid var(--line);font-size:14.5px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;min-height:52px}
-.mapinfo b{flex-basis:100%}
-.go{display:flex;gap:8px;flex-wrap:wrap}
-.maplist{list-style:none;margin:0;padding:8px 10px;display:flex;flex-direction:column;gap:2px;max-height:220px;overflow-y:auto;border-top:1px solid var(--line)}
-.maplist button{width:100%;display:flex;gap:10px;align-items:center;text-align:left;font:inherit;font-size:14px;color:var(--ink);background:none;border:0;border-radius:6px;padding:5px 6px;cursor:pointer}
-.maplist button.on{background:var(--accent-soft)}
-.maplist .mn{flex:none;width:22px;height:22px;border-radius:50%;background:var(--dc);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
-.go a{font-size:13.5px;text-decoration:none;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:3px 11px}
-.dk1{--dc:#1f5fae}.dk2{--dc:#0b7680}.dk3{--dc:#b8325c}.dk4{--dc:#96500f}.dk5{--dc:#5a4db3}
-@media (max-width:420px){h1{font-size:29px}}
+button.reset{align-self:flex-start;font-size:14px;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;cursor:pointer}
+.howto{background:var(--sea-soft);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+.howto b{color:var(--sea-deep)}
 </style>
 </head>
 <body>
+<div id="map" role="region" aria-label="沖繩行程 3D 地圖"></div>
 
-<div class="wrap">
+<div class="top">
+  <div class="brand"><span class="logo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span><span><b>沖繩衛福觀察手冊</b><small id="sub"></small></span></div>
+  <div class="chips" role="toolbar" aria-label="選擇日期"><button type="button" class="chip" data-day="0" aria-pressed="false"><i></i>全部</button><button type="button" class="chip" data-day="1" aria-pressed="false" style="--dc:#1689d6"><i></i>Day 1 <small>11/13</small></button><button type="button" class="chip" data-day="2" aria-pressed="false" style="--dc:#ef5a4c"><i></i>Day 2 <small>11/14</small></button><button type="button" class="chip" data-day="3" aria-pressed="false" style="--dc:#8a5cf0"><i></i>Day 3 <small>11/15</small></button><button type="button" class="chip" data-day="4" aria-pressed="false" style="--dc:#2a9d55"><i></i>Day 4 <small>11/16</small></button><button type="button" class="chip" data-day="5" aria-pressed="false" style="--dc:#e38b00"><i></i>Day 5 <small>11/17</small></button></div>
+</div>
 
-<header>
-  <div class="eyebrow">臺北市立大學衛生福利學系・UT Learning Force 沖繩移地教學 2026.11.13–11.17</div>
-  <h1>沖繩衛福觀察手冊</h1>
-  <p class="lede">行程、景點介紹、五感觀察與思考題，加上能用上衛福專業的觀察清單。每一項都靠看、數、拍就能完成，沒有機會訪談也做得出成果。勾選紀錄會存在這支手機上。</p>
-</header>
+<div class="fabs">
+  <button type="button" class="fab" id="floc" aria-label="顯示我的位置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg></button>
+  <button type="button" class="fab on" id="f3d" aria-label="切換成平面地圖">3D</button>
+  <button type="button" class="fab" id="fall" aria-label="看這天的全部站點"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<nav aria-label="頁內導覽">
-  <a href="#frame">主軸</a>
-  <a href="#mapsec">地圖</a>
-  <a href="#d1">Day 1</a>
-  <a href="#d2">Day 2</a>
-  <a href="#d3">Day 3</a>
-  <a href="#d4">Day 4</a>
-  <a href="#d5">Day 5</a>
-  <a href="#ud">通用設計</a>
-  <a href="#happy">吃喝逛</a>
-  <a href="#tools">記錄表</a>
-  <a href="#sources">來源</a>
-</nav>
-
-<section id="frame" style="scroll-margin-top:60px">
-  <div class="trip">
-    <div><b>去程</b>CI 120　11/13 桃園 08:10 → 那霸 10:50</div>
-    <div><b>回程</b>CI 121　11/17 09:00 飯店出發，09:30 到那霸機場</div>
-    <div><b>住宿</b>11/13–14 皇后飯店（安里）<br>11/15 喜璃癒志飯店（恩納村）<br>11/16 倫勃朗都風格飯店（那霸市西）</div>
-  </div>
-
-  <h2>課程的三個主題</h2>
-  <p>行前說明的主題是「日本沖繩島嶼城市自明性及文化表徵觀察移地研究」，要用五感深度觀察。每個景點都標了對應的主題。</p>
-  <ul class="plain">
-    <li>（一）島嶼城市空間與自明性</li>
-    <li>（二）文化表徵與地方認同</li>
-    <li>（三）島嶼社會發展與社區生活</li>
-  </ul>
-  <div class="legend" aria-label="五感圖示">
-    <span><span class="sense">視</span>視覺</span><span><span class="sense">聽</span>聽覺</span><span><span class="sense">嗅</span>嗅覺</span><span><span class="sense">味</span>味覺</span><span><span class="sense">觸</span>觸覺</span>
-  </div>
-
-  <h2>四條衛福觀察主軸</h2>
-  <p>沖繩曾是日本最長壽的地方，如今排名大幅下滑。我們要看的是長壽的條件還剩下什麼、流失了什麼，以及這跟台灣有多像。</p>
-  <div class="axes">
-    <div class="axis food"><b>食物環境</b><span>人們買得到、吃得到什麼。傳統食材與加工食品各占多少空間。</span></div>
-    <div class="axis age"><b>高齡友善</b><span>長者能不能自己出門、走路、休息、採買。對應 WHO 高齡友善城市的面向。</span></div>
-    <div class="axis soc"><b>社會參與與文化</b><span>長者是否還在工作、聚會、傳承技藝。信仰與習俗如何談健康。</span></div>
-    <div class="axis ud"><b>通用設計 UD</b><span>一開始就設計成所有人都能用的空間、產品與標示。不限長者或身障者。</span></div>
-  </div>
-
-  <div class="facts">
-    <h3>先記住這幾個數字</h3>
-    <div class="scroll">
-      <table>
-        <thead><tr><th>沖繩平均壽命的全國排名</th><th>1980</th><th>1990</th><th>2000</th><th>2010</th><th>2020</th></tr></thead>
-        <tbody>
-          <tr><td>男性</td><td>1</td><td>5</td><td>26</td><td>30</td><td>43</td></tr>
-          <tr><td>女性</td><td>1</td><td>1</td><td>1</td><td>3</td><td>16</td></tr>
-        </tbody>
-      </table>
+<aside class="sheet" id="sheet" aria-label="行程與觀察">
+  <div class="grab" id="grab">
+    <div class="handle" aria-hidden="true"></div>
+    <div class="peek" id="peek" aria-live="polite"></div>
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab" role="tab" data-tab="trip" aria-selected="true">行程</button>
+      <button type="button" class="tab" role="tab" data-tab="log" aria-selected="false">記錄表</button>
+      <button type="button" class="tab" role="tab" data-tab="eat" aria-selected="false">吃喝逛</button>
+      <button type="button" class="tab" role="tab" data-tab="info" aria-selected="false">說明</button>
     </div>
-    <p class="note">全日本 47 個都道府縣中的名次。2000 年男性跌到第 26 名，當地稱為「26 衝擊」。</p>
-    <ul>
-      <li>大宜味村高齡化率 40.7%，沖繩全縣 23.5%（2023 年 10 月）。</li>
-      <li>1949 年沖繩人的熱量約 69% 來自地瓜，米只占一成多。</li>
-      <li>下滑的原因多指向飲食西化、肥胖、以車代步與飲酒。</li>
-    </ul>
   </div>
-</section>
-
-
-<section id="mapsec" style="scroll-margin-top:60px">
-  <h2>行程地圖</h2>
-  <p>按「顯示我的位置」會用手機定位，在 OpenStreetMap 地圖上標出你在哪裡，下方清單會算出你離每一站多遠。點圓點或清單看是哪一站，「從我的位置導航」會交給 Google 地圖規劃路線。</p>
-  <div class="mapbox">
-    <div class="mapbar" role="toolbar" aria-label="地圖範圍與日期">
-      <button type="button" id="locate" aria-pressed="false">顯示我的位置</button>
-      <button type="button" data-view="island" aria-pressed="false">全島</button>
-      <button type="button" data-view="naha" aria-pressed="true">那霸周邊</button>
-      <button type="button" data-view="kokusai" aria-pressed="false">國際通一帶</button>
-      <span class="sp"></span>
-      <button type="button" data-day="0" aria-pressed="true">全部</button>
-      <button type="button" data-day="1" aria-pressed="false">Day 1</button>
-      <button type="button" data-day="2" aria-pressed="false">Day 2</button>
-      <button type="button" data-day="3" aria-pressed="false">Day 3</button>
-      <button type="button" data-day="4" aria-pressed="false">Day 4</button>
-      <button type="button" data-day="5" aria-pressed="false">Day 5</button>
-    </div>
-    <div id="gmap" role="region" aria-label="沖繩行程地圖"></div>
-    <ul class="maplist" id="maplist" aria-label="地圖上的景點"></ul>
-    <div class="mapinfo" id="mapinfo" aria-live="polite">圓點的數字是當天第幾站，顏色代表哪一天。</div>
-  </div>
-</section>
-
-<section>
+  <div class="panel" id="panel">
+    <div class="pane" id="pane-trip">
+<section class="daysec" data-d="1">
 <div class="day" id="d1"><h2>Day 1 抵達與豐見城市周邊</h2><span class="date">11/13（五）・那霸市</span><span class="prog" data-prog="d1"></span></div>
 <p class="daysub">中華航空 CI 120　桃園 08:10 → 那霸 10:50。行前說明只寫「豐見城市周邊」，下面標「建議」的點是地圖網站依教學主題補上的觀察點。</p>
 <p class="wx">天氣預報（地圖網站製作時）：陰天偶陣晴，降雨 20%，22–27°C</p>
@@ -258,7 +227,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag ud">通用設計</span><span class="th">（一）島嶼城市空間與自明性</span></div>
 <h3>那霸機場</h3>
 <p class="ja">10:50 抵達（CI 120） · 那覇空港</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.206289,127.651171">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.206289,127.651171&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="airport">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.206289,127.651171" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.206289,127.651171&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="airport">在 3D 地圖上看</button></div>
 <p class="intro">沖繩的門戶，單軌電車（ゆいレール）的起點站那霸空港站直接連通航廈。跑道與航廈緊鄰市區，從機場到市中心只需十多分鐘車程，這在島嶼城市是很典型的空間條件。</p>
 <div class="lab">五感觀察</div><ul class="senses">
 <li><span class="sense s-v" aria-label="視覺">視</span><span>入境大廳的第一印象：標示語言、色彩、圖像用了哪些「沖繩」符號（風獅爺シーサー、紅型紋樣、扶桑花）。</span></li>
@@ -273,7 +242,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="th">（一）島嶼城市空間與自明性</span><span class="th">（三）島嶼社會發展與社區生活</span><span class="sug">建議點</span></div>
 <h3>瀨長島 Umikaji Terrace</h3>
 <p class="ja">瀬長島ウミカジテラス</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.176388,127.640405">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.176388,127.640405&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="senaga">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.176388,127.640405" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.176388,127.640405&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="senaga">在 3D 地圖上看</button></div>
 <p class="intro">瀨長島是一座以道路與本島相連的小島，就在那霸機場跑道南側。西側斜坡上的 Umikaji Terrace 於 2015 年開幕，白色建築沿著坡面層層排列，面向東海與夕陽。</p>
 <p class="intro">這裡適合觀察「島嶼觀光意象是怎麼被設計出來的」：白牆、階梯、海景的組合並不是沖繩傳統聚落的樣貌，卻成功變成新的沖繩代表畫面之一。</p>
 <div class="lab">五感觀察</div><ul class="senses">
@@ -291,7 +260,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="th">（二）文化表徵與地方認同</span><span class="sug">建議點</span></div>
 <h3>舊海軍司令部壕</h3>
 <p class="ja">旧海軍司令部壕（海軍壕公園）</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.186191,127.676714">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.186191,127.676714&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="navy">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.186191,127.676714" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.186191,127.676714&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="navy">在 3D 地圖上看</button></div>
 <p class="intro">位在豐見城市與那霸市交界的高地上。地下壕由日本海軍於 1944 年挖掘，作為沖繩方面根據地隊的司令部，1945 年 6 月沖繩戰末期，司令官大田實少將等人在壕內自決。現在部分坑道對外開放，地面則是可以俯瞰那霸市區的公園。</p>
 <p class="intro">沖繩的地方認同離不開戰爭記憶。這個點可以和第三天的首里城（城下同樣有日軍司令部壕）對照，看同一段歷史在不同場域如何被保存與說明。</p>
 <div class="lab">五感觀察</div><ul class="senses">
@@ -307,7 +276,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag food">食物環境</span><span class="tag age">高齡友善</span><span class="th">（一）島嶼城市空間與自明性</span><span class="sug">建議點</span></div>
 <h3>豐崎海濱新市鎮</h3>
 <p class="ja">豊崎（イーアス沖縄豊崎・美らSUNビーチ）</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.157108,127.651707">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.157108,127.651707&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="toyosaki">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.157108,127.651707" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.157108,127.651707&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="toyosaki">在 3D 地圖上看</button></div>
 <p class="intro">豐崎是豐見城市西側填海造陸形成的新市鎮，區內有大型購物中心 iias 沖繩豐崎（2020 年開幕）、Outlet 商場 Ashibinaa，以及人工沙灘豐崎美麗 SUN 海灘。</p>
 <p class="intro">和那霸舊市區相比，這裡的街廓大、道路寬、以開車為前提，是觀察沖繩「汽車社會」與新開發區空間邏輯的好樣本。</p>
 <div class="lab">五感觀察</div><ul class="senses">
@@ -324,7 +293,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag age">高齡友善</span><span class="th">（一）島嶼城市空間與自明性</span></div>
 <h3>皇后飯店（第一、二晚）</h3>
 <p class="ja">入住 · 那覇市安里 2-4-2-1｜098-869-6600</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.218262,127.694275">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.218262,127.694275&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="queen">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.218262,127.694275" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.218262,127.694275&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="queen">在 3D 地圖上看</button></div>
 <p class="intro">位在安里，步行可到單軌電車安里站與牧志站，往西就是國際通的東端。安里是國際通商圈與新都心（おもろまち）之間的交界地帶。清晨與入夜後從飯店走出去，是觀察那霸日常步行環境最方便的時段。</p>
 <div class="lab">五感觀察</div><ul class="senses">
 <li><span class="sense s-v" aria-label="視覺">視</span><span>單軌電車高架軌道與底下道路、河道（安里川）的疊合方式，車站出入口如何接到人行道。</span></li>
@@ -336,7 +305,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 </ol>
 </article>
 </section>
-<section>
+<section class="daysec" data-d="2">
 <div class="day" id="d2"><h2>Day 2 國際通散策</h2><span class="date">11/14（六）・那霸市</span><span class="prog" data-prog="d2"></span></div>
 <p class="daysub">全程步行，各點彼此相距都在十分鐘腳程內。18:00 師生聚餐在コキヤ火鍋（90 分鐘）。</p>
 <p class="wx">天氣預報（地圖網站製作時）：陰天，降雨 40%，23–28°C</p>
@@ -344,7 +313,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag ud">通用設計</span><span class="tag soc">社會參與與文化</span><span class="th">（一）島嶼城市空間與自明性</span><span class="th">（二）文化表徵與地方認同</span></div>
 <h3>國際通</h3>
 <p class="ja">散策起點 · 国際通り</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.216329,127.689219">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.216329,127.689219&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="kokusai">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.216329,127.689219" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.216329,127.689219&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="kokusai">在 3D 地圖上看</button></div>
 <p class="intro">那霸最主要的商業大街，全長約 1.6 公里，西起縣廳前、東到安里。這一帶在沖繩戰中幾乎全毀，戰後迅速復興，因而有「奇蹟的一英里」之稱。</p>
 <p class="intro">大街本身是觀光商業的正面，往南岔進去的市場本通、睦橋通、平和通等拱廊商店街，才逐漸接到在地人的生活圈。從大街走進巷內的過程，就是今天的觀察主軸。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
@@ -367,7 +336,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag food">食物環境</span><span class="tag ud">通用設計</span><span class="th">（二）文化表徵與地方認同</span><span class="th">（一）島嶼城市空間與自明性</span></div>
 <h3>第一牧志公設市場</h3>
 <p class="ja">第一牧志公設市場</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.214546,127.688288">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.214546,127.688288&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="makishi">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.214546,127.688288" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.214546,127.688288&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="makishi">在 3D 地圖上看</button></div>
 <p class="intro">有「那霸的廚房」之稱。市場的起點是戰後自然聚集的黑市，後來由市政府設為公設市場。舊建築因老朽拆除重建，新市場於 2023 年 3 月在原址重新開幕。</p>
 <p class="intro">一樓是鮮魚、精肉與醃漬物攤位，二樓是食堂。在一樓買海鮮、拿到二樓付費代為烹調的做法（稱為「持ち上げ」），是這裡特有的消費方式。傳統食材和戰後才普及的加工肉品擺在同一個市場裡，是看飲食轉型最直接的地方。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
@@ -394,7 +363,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag age">高齡友善</span><span class="tag soc">社會參與與文化</span><span class="th">（二）文化表徵與地方認同</span><span class="th">（一）島嶼城市空間與自明性</span></div>
 <h3>平和通商店街</h3>
 <p class="ja">平和通り商店街</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.214979,127.688766">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.214979,127.688766&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="heiwa">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.214979,127.688766" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.214979,127.688766&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="heiwa">在 3D 地圖上看</button></div>
 <p class="intro">從國際通往南延伸的拱廊商店街，同樣源自戰後的市集，街名取「和平」之意。街上有服飾、雜貨、乾貨與伴手禮店，越往南走越接近壺屋，店家的在地色彩也越濃。</p>
 <p class="intro">拱廊讓這一帶在強烈日照與陣雨之下仍然好走，是亞熱帶島嶼城市很實際的步行環境對策，也適合觀察長者的日常採買與碰面。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
@@ -418,7 +387,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag age">高齡友善</span><span class="th">（二）文化表徵與地方認同</span></div>
 <h3>壺屋やちむん通</h3>
 <p class="ja">壺屋やちむん通り</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.212911,127.691806">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.212911,127.691806&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="tsuboya">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.212911,127.691806" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.212911,127.691806&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="tsuboya">在 3D 地圖上看</button></div>
 <p class="intro">「やちむん」是沖繩話的「燒物」，也就是陶器。1682 年琉球王府把各地的窯場集中到這裡，壺屋從此成為琉球陶業的中心。這一帶在沖繩戰中受損相對較輕，街道走向與石牆仍留有舊聚落的樣貌。</p>
 <p class="intro">街道長約四百公尺，兩側是窯元直營店與藝廊，入口處有那霸市立壺屋燒物博物館。石板路與緩坡的老街，也適合用下方的檢核表看步行環境。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
@@ -440,7 +409,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag soc">社會參與與文化</span><span class="th">（二）文化表徵與地方認同</span></div>
 <h3>櫻坂劇場</h3>
 <p class="ja">桜坂劇場</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.214744,127.690128">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.214744,127.690128&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="sakura">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.214744,127.690128" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.214744,127.690128&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="sakura">在 3D 地圖上看</button></div>
 <p class="intro">2005 年開幕的獨立電影院，前身是老戲院。館內除了放映廳，還有咖啡店、書店與販售沖繩工藝品的選物店，並開設市民講座，是那霸重要的藝文據點。</p>
 <p class="intro">櫻坂一帶在戰後曾是熱鬧的社交飲食街，如今周邊有新飯店進駐，新舊並陳。這裡可以觀察老建築再利用如何成為地方文化的發信站。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
@@ -460,7 +429,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag food">食物環境</span><span class="th">（二）文化表徵與地方認同</span></div>
 <h3>コキヤ火鍋（師生聚餐）</h3>
 <p class="ja">18:00（90 分鐘） · しゃぶしゃぶ コキヤ｜那覇市牧志 3-2-3 鉢嶺クリスタルビル 2 樓｜+81 98-868-5589</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.216497,127.689125">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.216497,127.689125&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="kokiya">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.216497,127.689125" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.216497,127.689125&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="kokiya">在 3D 地圖上看</button></div>
 <p class="intro">在國際通旁、靠近牧志站的大樓二樓。拿自己當觀察對象：沖繩長輩講「腹八分」，吃到八分飽就停。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
 <li><label><input type="checkbox" id="c-dinner-1"><span>記下這桌點了幾盤肉、幾盤菜</span></label></li>
@@ -475,7 +444,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 </ol>
 </article>
 </section>
-<section>
+<section class="daysec" data-d="3">
 <div class="day" id="d3"><h2>Day 3 琉球王國與文化保存</h2><span class="date">11/15（日）・那霸市、中部</span><span class="prog" data-prog="d3"></span></div>
 <p class="daysub">飯店 08:30 出發。今晚換住恩納村的喜璃癒志飯店。</p>
 <p class="wx">天氣預報（地圖網站製作時）：多雲短暫雨，降雨 70%，22–27°C</p>
@@ -484,7 +453,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag soc">社會參與與文化</span><span class="th">（二）文化表徵與地方認同</span><span class="th">（一）島嶼城市空間與自明性</span></div>
 <h3>波上宮</h3>
 <p class="ja">波上宮（なみのうえぐう）</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.220559,127.671135">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.220559,127.671135&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="naminoue">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.220559,127.671135" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.220559,127.671135&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="naminoue">在 3D 地圖上看</button></div>
 <p class="intro">建在臨海石灰岩斷崖上的神社，位居「琉球八社」之首。這裡自古就是人們向海的彼方祈求豐收與航海平安的聖地，後來成為祭祀熊野神的神社，深受琉球王府崇敬。</p>
 <p class="intro">崖下的波之上海灘是那霸市區內的海灘，海灘正前方有臨港高架道路橫過。聖地、休閒海灘與交通建設擠在同一個畫面裡。神社的繪馬寫著人們的願望，也可以看出健康在當地人心中的分量。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
@@ -508,7 +477,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag food">食物環境</span><span class="tag soc">社會參與與文化</span><span class="tag ud">通用設計</span><span class="th">（二）文化表徵與地方認同</span><span class="th">（一）島嶼城市空間與自明性</span></div>
 <h3>沖繩縣立博物館・美術館</h3>
 <p class="ja">沖縄県立博物館・美術館（おきみゅー）</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.227158,127.693717">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.227158,127.693717&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="okimu">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.227158,127.693717" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.227158,127.693717&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="okimu">在 3D 地圖上看</button></div>
 <p class="intro">2007 年開館，博物館與美術館共用一棟建築。白色厚重的外牆以琉球的城（グスク）為意象，牆面上的開孔可以引入自然光並阻擋強烈日照。</p>
 <p class="intro">博物館常設展以「海與島的生活」為主軸，從自然史、考古、琉球王國、近代到戰後依序展開。館址所在的新都心（おもろまち）是美軍住宅區歸還後重新開發的市區，本身也是戰後都市史的展品。這裡也能找到沖繩飲食為什麼像台灣、又為什麼在戰後改變的歷史證據，展區名稱以現場為準。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
@@ -533,7 +502,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag soc">社會參與與文化</span><span class="th">（二）文化表徵與地方認同</span><span class="th">（三）島嶼社會發展與社區生活</span></div>
 <h3>玉泉洞王國村</h3>
 <p class="ja">おきなわワールド（玉泉洞・王国村）</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.140358,127.749455">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.140358,127.749455&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="gyokusen">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.140358,127.749455" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.140358,127.749455&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="gyokusen">在 3D 地圖上看</button></div>
 <p class="intro">位在本島南部南城市的主題園區。核心是鐘乳石洞玉泉洞，全長約五公里，其中約 890 公尺對外開放。地面上的王國村把多棟百年以上的琉球古民家移築到園內，作為紅型、織布、玻璃、陶藝等工藝體驗工房，並有エイサー（太鼓舞）演出。</p>
 <p class="intro">這是一個把自然地景與文化表演打包給觀光客的場域，很適合用來檢視「文化如何被展示」，也可以看舊式住宅怎麼安排鄰里互動的空間。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
@@ -556,7 +525,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag age">高齡友善</span><span class="tag ud">通用設計</span><span class="th">（二）文化表徵與地方認同</span></div>
 <h3>首里城</h3>
 <p class="ja">14:00 起，外城約 2 小時 · 首里城公園</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.217001,127.719372">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.217001,127.719372&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="shuri">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.217001,127.719372" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.217001,127.719372&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="shuri">在 3D 地圖上看</button></div>
 <p class="intro">琉球王國（1429 至 1879 年）的王城，也是政治、外交與祭祀的中心。建築融合中國與日本的手法：正殿朝西、紅漆與龍柱帶有中國宮殿色彩，屋頂形式與部分構造則近於日本建築。</p>
 <p class="intro">城在 1945 年沖繩戰中全毀，1992 年復原正殿等建築；2000 年城跡登錄為世界遺產。2019 年 10 月 31 日大火再度燒毀正殿等主要建築。地圖網站引用的報導指出，重建後的正殿預定 2026 年 11 月 22 日舉行完成典禮、11 月 23 日起開放並採事前預約，所以 11 月 15 日到訪時正殿內部還沒開放，看到的會是完工前最後階段的樣子，實際以現場公告為準。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
@@ -579,7 +548,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="th">（二）文化表徵與地方認同</span></div>
 <h3>守禮門</h3>
 <p class="ja">守礼門</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.218147,127.71689">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.218147,127.71689&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="shurei">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.218147,127.71689" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.218147,127.71689&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="shurei">在 3D 地圖上看</button></div>
 <p class="intro">首里城外的牌樓式大門，創建於十六世紀尚清王時期，現存建築是戰後 1958 年復原。門上的匾額寫著「守禮之邦」，意思是琉球是重視禮節的國家，原本是迎接中國冊封使時懸掛的。守禮門也是兩千日圓紙鈔上的圖案。</p>
 <div class="lab">五感觀察</div><ul class="senses">
 <li><span class="sense s-v" aria-label="視覺">視</span><span>牌樓的形式（三間、重簷、紅瓦）與中國牌坊、日本鳥居各有什麼相似與不同。</span></li>
@@ -593,7 +562,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag age">高齡友善</span><span class="tag ud">通用設計</span><span class="th">（二）文化表徵與地方認同</span><span class="th">（一）島嶼城市空間與自明性</span></div>
 <h3>首里金城町石疊道</h3>
 <p class="ja">首里金城町石畳道</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.215327,127.714766">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.215327,127.714766&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="ishidatami">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.215327,127.714766" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.215327,127.714766&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="ishidatami">在 3D 地圖上看</button></div>
 <p class="intro">十六世紀尚真王時期修築的官道「真珠道」的一段。金城町這段約三百公尺保存下來，以琉球石灰岩鋪成，兩側是石牆與紅瓦民家。</p>
 <p class="intro">這是仍有居民生活的歷史街區，不是封閉的展示園區。坡度相當陡，觀光名勝同時是長者每天要走的路。途中的金城村屋可以休息，岔路進去有樹齡兩百年以上的大茄苳（大アカギ）。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
@@ -615,7 +584,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="th">（三）島嶼社會發展與社區生活</span></div>
 <h3>喜璃癒志飯店（第三晚）</h3>
 <p class="ja">入住 · 沖縄かりゆしビーチリゾート・オーシャンスパ｜恩納村名嘉真ヤーシ原 2591-1｜098-967-8731</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.525948,127.930051">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.525948,127.930051&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="kariyushi">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.525948,127.930051" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.525948,127.930051&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="kariyushi">在 3D 地圖上看</button></div>
 <p class="intro">從那霸沿著國道 58 號北上約一個多小時。恩納村西海岸是沖繩度假飯店最集中的地帶。從那霸一路往北，車窗外會依序經過都會區、美軍基地圍籬、度假區與農村，是一堂移動中的島嶼地理課。</p>
 <div class="lab">五感觀察</div><ul class="senses">
 <li><span class="sense s-v" aria-label="視覺">視</span><span>國道 58 號沿線的景觀變化：基地圍籬的長度、英文招牌、美式餐廳出現的區段。</span></li>
@@ -627,7 +596,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 </ol>
 </article>
 </section>
-<section>
+<section class="daysec" data-d="4">
 <div class="day" id="d4"><h2>Day 4 山原聚落與北山王城</h2><span class="date">11/16（一）・中北部</span><span class="prog" data-prog="d4"></span></div>
 <p class="daysub">飯店 08:30 出發，先到最遠的大宜味村，再折回今歸仁與本部半島，最後南下北中城。</p>
 <p class="wx">天氣預報（地圖網站製作時）：陰天，降雨 40%，22–27°C</p>
@@ -636,7 +605,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag food">食物環境</span><span class="tag age">高齡友善</span><span class="tag soc">社會參與與文化</span><span class="th">（三）島嶼社會發展與社區生活</span></div>
 <h3>大宜味村農村活性化中心（本次重點）</h3>
 <p class="ja">大宜味村農村活性化センター（旧 道の駅おおぎみ）</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.690217,128.108039">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.690217,128.108039&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="ogimi">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.690217,128.108039" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.690217,128.108039&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="ogimi">在 3D 地圖上看</button></div>
 <p class="intro">大宜味村位在本島北部「山原（やんばる）」地區的西海岸，背山面海，聚落沿著國道 58 號一個個排列。1993 年宣告「長壽日本一」，如今每十人有四人超過 65 歲。也是香檬（シークヮーサー）的主要產地，喜如嘉聚落的芭蕉布是國家指定重要無形文化財。</p>
 <p class="intro">中心原本是公路休息站，可以直接看到在地人種什麼、吃什麼、怎麼把農產品變成商品。50 到 90 多歲女性組成的公司「わーけーまちや」登記在這裡，用香檬開發商品。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
@@ -663,7 +632,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag ud">通用設計</span><span class="tag age">高齡友善</span><span class="th">（三）島嶼社會發展與社區生活</span><span class="th">（二）文化表徵與地方認同</span></div>
 <h3>今歸仁城跡</h3>
 <p class="ja">今帰仁城跡</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.690889,127.929733">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.690889,127.929733&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="nakijin">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.690889,127.929733" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.690889,127.929733&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="nakijin">在 3D 地圖上看</button></div>
 <p class="intro">琉球統一之前「三山時代」北山王的居城，建於十三世紀前後，城牆沿著山勢蜿蜒約 1.5 公里。1416 年北山被中山的尚巴志攻滅，1609 年薩摩入侵時城被燒毀，此後逐漸成為祭祀的聖地。2000 年與首里城跡等一同登錄為世界遺產。</p>
 <p class="intro">城牆使用當地的古期石灰岩，顏色偏灰、質地堅硬。這裡適合和昨天的首里城對照：一座是不斷重建的王城，一座是以遺構狀態保存的城跡，兩者代表文化資產處理方式的兩端。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
@@ -687,7 +656,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag age">高齡友善</span><span class="tag soc">社會參與與文化</span><span class="th">（三）島嶼社會發展與社區生活</span></div>
 <h3>備瀨福木林道</h3>
 <p class="ja">備瀬のフクギ並木</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.701416,127.880036">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.701416,127.880036&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="bise">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.701416,127.880036" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.701416,127.880036&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="bise">在 3D 地圖上看</button></div>
 <p class="intro">本部町備瀨是一座被福木防風林完整包覆的海邊聚落。福木葉片厚、樹幹直、耐鹽耐風，自古被種在住家四周抵擋颱風與冬季季風，據稱全聚落約有兩萬棵，樹齡老的有三百年左右。</p>
 <p class="intro">聚落的巷道呈棋盤狀，每戶住家以福木為牆。林道內至今仍有居民居住，同時也是熱門的散步景點，往北走到底是備瀨崎。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
@@ -712,7 +681,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag food">食物環境</span><span class="tag age">高齡友善</span><span class="tag ud">通用設計</span><span class="th">（一）島嶼城市空間與自明性</span><span class="th">（三）島嶼社會發展與社區生活</span></div>
 <h3>永旺夢樂城沖繩來客夢</h3>
 <p class="ja">イオンモール沖縄ライカム</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.314226,127.79592">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.314226,127.79592&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="rycom">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.314226,127.79592" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.314226,127.79592&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="rycom">在 3D 地圖上看</button></div>
 <p class="intro">2015 年開幕的大型購物中心，位在本島中部的北中城村。基地原本是美軍的泡瀨高爾夫球場，歸還後重新開發；「來客夢（Rycom）」這個名稱來自過去設在這一帶的琉球美軍司令部（Ryukyu Command）。</p>
 <p class="intro">這是「基地歸還地再利用」的代表案例，可以和第三天的那霸新都心一起討論。也是現代沖繩人實際採買的地方：用同一張表再數一次，就能和牧志市場比較。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
@@ -738,7 +707,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag ud">通用設計</span></div>
 <h3>倫勃朗都風格飯店（第四晚）</h3>
 <p class="ja">入住 · レンブラントスタイル那覇｜那覇市西 2-24-3｜098-975-9110</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.213451,127.667852">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.213451,127.667852&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="rembrandt">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.213451,127.667852" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.213451,127.667852&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="rembrandt">在 3D 地圖上看</button></div>
 <p class="intro">在那霸市西町、靠近那霸港。這間飯店設有不分對象都好用的通用客房，住進去之後可以從大廳一路看到自己的房間。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
 <li><label><input type="checkbox" id="c-hotel-1"><span>從門口走到房間，記下經過幾個高低差、門把是哪一種</span></label></li>
@@ -746,7 +715,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 </ul>
 </article>
 </section>
-<section>
+<section class="daysec" data-d="5">
 <div class="day" id="d5"><h2>Day 5 返臺</h2><span class="date">11/17（二）・那霸市</span><span class="prog" data-prog="d5"></span></div>
 <p class="daysub">華航 CI 121 一行 09:00 自飯店出發，09:30 抵達那霸機場。浦添市周邊是長榮 BR 185 一行（10:30 出發、18:00 到機場）的行程，標「建議」的是地圖網站補上的觀察點，給有興趣的人參考。</p>
 <p class="wx">天氣預報（地圖網站製作時）：多雲短暫雨，降雨 70%，21–25°C</p>
@@ -755,7 +724,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag ud">通用設計</span><span class="th">（一）島嶼城市空間與自明性</span></div>
 <h3>那霸機場（返臺）</h3>
 <p class="ja">09:30 抵達（CI 121） · 那覇空港</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.206289,127.651171">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.206289,127.651171&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="airport5">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.206289,127.651171" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.206289,127.651171&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="airport5">在 3D 地圖上看</button></div>
 <p class="intro">機場的身障者與高齡者觀光案內所 10:00 才開，09:30 抵達時還沒開門，可以改看航廈裡的通用設計：多功能廁所、導盲磚、多語標示、行李推車。</p>
 <div class="lab">衛福觀察</div><ul class="checks">
 <li><label><input type="checkbox" id="c-air-1"><span>在航廈找一個通用設計七原則的實例拍下來</span></label></li>
@@ -768,7 +737,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="th">（二）文化表徵與地方認同</span><span class="sug">建議點</span></div>
 <h3>浦添城跡與浦添ようどれ</h3>
 <p class="ja">浦添城跡・浦添ようどれ</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.248119,127.730591">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.248119,127.730591&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="urasoe">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.248119,127.730591" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.248119,127.730591&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="urasoe">在 3D 地圖上看</button></div>
 <p class="intro">浦添城是首里之前的中山王都，十三到十五世紀初是琉球中部的政治中心。城北側崖下的「浦添ようどれ」是王陵，安葬十三世紀的英祖王與十七世紀初的尚寧王。</p>
 <p class="intro">城跡所在的稜線在沖繩戰中稱為前田高地，是 1945 年春天的激戰地，城牆與王陵都遭到嚴重破壞，戰後陸續修復。一個地點同時疊著王國起源、王陵信仰與戰場三層記憶。</p>
 <div class="lab">五感觀察</div><ul class="senses">
@@ -784,7 +753,7 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 <div class="tags"><span class="tag soc">社會參與與文化</span><span class="th">（一）島嶼城市空間與自明性</span><span class="th">（三）島嶼社會發展與社區生活</span><span class="sug">建議點</span></div>
 <h3>港川外人住宅街</h3>
 <p class="ja">港川ステイツサイドタウン</p>
-<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.262501,127.714599">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.262501,127.714599&travelmode=walking">從我的位置導航</a><button type="button" class="onmap" data-key="minatogawa">在上方地圖標出</button></div>
+<div class="go"><a href="https://www.google.com/maps/search/?api=1&query=26.262501,127.714599" target="_blank" rel="noopener">在 Google 地圖打開</a><a href="https://www.google.com/maps/dir/?api=1&destination=26.262501,127.714599&travelmode=walking" target="_blank" rel="noopener">從我的位置導航</a><button type="button" class="onmap" data-key="minatogawa">在 3D 地圖上看</button></div>
 <p class="intro">戰後為美軍相關人員興建的平房住宅區，後來轉為民間使用，現在有數十棟改裝成咖啡店、甜點店與選物店。區內巷道以美國州名命名（如 Texas、Florida）。</p>
 <p class="intro">鋼筋混凝土平屋頂、方正的白色量體是當年的標準規格，這種建築形式後來也深深影響了沖繩一般民宅的樣貌。</p>
 <div class="lab">五感觀察</div><ul class="senses">
@@ -797,75 +766,9 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 </ol>
 </article>
 </section>
-
-<section>
-  <div class="day" id="ud"><h2>通用設計 UD</h2><span class="date">每天都能找</span><span class="prog" data-prog="ud"></span></div>
-  <p>通用設計（Universal Design）由美國建築師 Ronald Mace 提出。無障礙是替特定對象把既有的障礙拿掉，通用設計是從一開始就做成所有人都好用。沖繩縣的說法是兩者並行：舊的做無障礙，新的用通用設計。</p>
-
-  <article class="stop" data-day="ud">
-    <h3>七原則尋寶</h3>
-    <p class="intro">每個原則找一個實例拍下來。飯店、便利商店、單軌電車站、巴士、機場都找得到。</p>
-    <ul class="checks">
-      <li><label><input type="checkbox" id="c-ud-1"><span><b>公平使用</b>　所有人走同一個入口：自動門、與樓梯並排的斜坡</span></label></li>
-      <li><label><input type="checkbox" id="c-ud-2"><span><b>彈性使用</b>　高低兩道扶手、左右手都能操作的設計</span></label></li>
-      <li><label><input type="checkbox" id="c-ud-3"><span><b>簡單直覺</b>　不識字也看得懂的圖示、用顏色區分的路線</span></label></li>
-      <li><label><input type="checkbox" id="c-ud-4"><span><b>資訊明確</b>　導盲磚、有聲號誌、文字加點字加多語的標示</span></label></li>
-      <li><label><input type="checkbox" id="c-ud-5"><span><b>容許錯誤</b>　月台門、防夾的電梯門、形狀不同的馬桶按鈕</span></label></li>
-      <li><label><input type="checkbox" id="c-ud-6"><span><b>省力</b>　下壓式門把、大片式開關、感應水龍頭</span></label></li>
-      <li><label><input type="checkbox" id="c-ud-7"><span><b>尺寸與空間</b>　多功能廁所、寬閘門、位置較低的販賣機投幣口</span></label></li>
-    </ul>
-  </article>
-
-  <article class="stop" data-day="ud">
-    <h3>便利商店裡的通用設計</h3>
-    <p class="intro">日本有些包裝靠觸覺就能分辨內容物，買東西時順手摸摸看。</p>
-    <ul class="checks">
-      <li><label><input type="checkbox" id="c-ud-8"><span>洗髮精瓶身側面的凸紋，用來和潤髮乳區分</span></label></li>
-      <li><label><input type="checkbox" id="c-ud-9"><span>牛奶紙盒頂部的半圓缺口</span></label></li>
-      <li><label><input type="checkbox" id="c-ud-10"><span>酒類罐頂的點字</span></label></li>
-    </ul>
-  </article>
-
-  <div class="facts">
-    <h3>沖繩的背景</h3>
-    <ul>
-      <li>1997 年 4 月施行「福祉のまちづくり条例」，新建築的無障礙逐年改善，條例之前蓋的舊建築仍是課題。</li>
-      <li>2007 年發表「沖繩觀光無障礙宣言」，同年在那霸機場設立身障者與高齡者觀光案內所，是日本第一個設在機場內的這類窗口。</li>
-      <li>機場據點仍在營運：國內線航廈 1 樓抵達大廳、中央電梯對面，10:00–18:00，出借輪椅、嬰兒車與筆談器。11/17 我們 09:30 到機場時還沒開門。</li>
-      <li>行程裡剛好有新舊對比：石疊道與老商店街是舊環境，改建後的牧志市場與 AEON 是新環境。</li>
-    </ul>
-    <p class="tw"><b>對照台灣</b>　捷運與新建公共建築，對上老舊騎樓與公寓。同樣是新的做得到、舊的改不動。</p>
-  </div>
-</section>
-
-<section id="happy" style="scroll-margin-top:60px">
-  <h2>吃喝逛</h2>
-  <p>認真觀察之餘的口袋名單。美食評語全部出自 Dcard 網友的實吃心得，好評負評照原文轉述，「雷」是網友不推的店。營業時間與是否還在營業，出發前請用 Google 地圖再確認。</p>
-  <div class="eats">
-<article class="eat"><div class="eathead"><span class="et">甜</span><b>Yanbaru Gelato（iias 豐崎店）</b><span class="dchip">Day 1</span></div><p class="ja">やんばるジェラート イーアス沖縄豊崎店</p><p class="say">原 po 本來就偏愛 gelato，說這家很合口味，特別推黑芝麻和巧克力。</p><p class="tip">店在 iias 沖繩豐崎商場裡。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/257945079">Dcard「沖繩 16 家美食分享」</a></p></article>
-<article class="eat"><div class="eathead"><span class="et">吃</span><b>豬肉蛋飯糰本店</b><span class="dchip">Day 2</span></div><p class="ja">ポークたまごおにぎり本店（ポーたま）</p><p class="say">給 4.5 分，說炸蝦塔塔醬口味層次很多。</p><p class="say">另一篇覺得苦瓜口味中規中矩；不愛午餐肉的原 po 覺得普通、味噌醬偏鹹。</p><p class="tip">就在牧志公設市場旁。愛不愛午餐肉是關鍵，常要排隊。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/261469586">Dcard「沖繩 20 家美食誠實心得：由北到南自駕實測」</a> <a href="https://www.dcard.tw/f/japan_travel/p/259429385">Dcard「沖繩不自駕 4 天 3 夜 ep.1 觀光客美食巡禮」</a> <a href="https://www.dcard.tw/f/japan_travel/p/257945079">Dcard「沖繩 16 家美食分享」</a></p></article>
-<article class="eat"><div class="eathead"><span class="et">甜</span><b>Blue Seal 國際通店</b><span class="dchip">Day 2</span></div><p class="ja">ブルーシール 国際通り店</p><p class="say">冰淇淋的海鹽餅乾口味不錯，但國際通店的可麗餅「蠻不推薦」，奶油很膩。</p><p class="say">另一位覺得偏甜，更推 Fontana Gelato（沒有可靠座標，不列）。</p><p class="tip">吃冰淇淋可以，可麗餅先不要。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/257945079">Dcard「沖繩 16 家美食分享」</a> <a href="https://www.dcard.tw/f/japan_travel/p/261469586">Dcard「沖繩 20 家美食誠實心得：由北到南自駕實測」</a></p></article>
-<article class="eat"><div class="eathead"><span class="et">喝</span><b>國際通屋台村</b><span class="dchip">Day 2</span></div><p class="ja">国際通り屋台村</p><p class="say">適合體驗居酒屋氣氛，Orion 生啤與泡盛是常見的選擇。地圖網站只看到這篇的摘要。</p><p class="tip">離聚餐的コキヤ與櫻坂劇場都很近，聚餐後續攤順路。</p><p class="srcl">來源：<a href="https://www.dcard.tw/@tsai_tsaizhi/post/259391407">Dcard 國際通屋台村分享文</a></p></article>
-<article class="eat"><div class="eathead"><span class="et">吃</span><b>燒肉本部牧場 那霸店</b><span class="dchip">Day 2</span></div><p class="ja">焼肉もとぶ牧場 那覇店</p><p class="say">給 4.5 分，要自己烤、牛肉沒先調味，但肉質與份量都很滿意。</p><p class="tip">在縣廳前站附近，從國際通西端走過去。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/261469586">Dcard「沖繩 20 家美食誠實心得：由北到南自駕實測」</a></p></article>
-<article class="eat bad"><div class="eathead"><span class="et bad">雷</span><b>EIBUN 沖繩麵（排隊提醒）</b><span class="dchip">Day 2</span></div><p class="ja">Okinawa Soba EIBUN</p><p class="say bad">只給 2.5 分。排了一小時，覺得招牌麵味道家常、瘦肉偏柴，冷麵倒清爽。</p><p class="tip">就在壺屋やちむん通旁。這是單一網友的感想。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/261469586">Dcard「沖繩 20 家美食誠實心得：由北到南自駕實測」</a></p></article>
-<article class="eat"><div class="eathead"><span class="et">甜</span><b>萬座毛的 Blue Seal</b><span class="dchip">Day 3</span></div><p class="ja">万座毛</p><p class="say">原 po 覺得海鹽餅乾口味不錯。</p><p class="tip">在往喜璃癒志飯店的路上，行程沒有排，時間夠才考慮。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/257945079">Dcard「沖繩 16 家美食分享」</a></p></article>
-<article class="eat"><div class="eathead"><span class="et">吃</span><b>古宇利蝦蝦飯</b><span class="dchip">Day 4</span></div><p class="ja">KOURI SHRIMP</p><p class="say">給 4.5 分，蒜香奶油配辣粉是絕配。</p><p class="say">另一篇取餐等了約半小時，家人覺得是「能想像的味道」。</p><p class="tip">在古宇利島，跟團當天多半去不了。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/261469586">Dcard「沖繩 20 家美食誠實心得：由北到南自駕實測」</a> <a href="https://www.dcard.tw/f/japan_travel/p/257945079">Dcard「沖繩 16 家美食分享」</a></p></article>
-<article class="eat"><div class="eathead"><span class="et">吃</span><b>Hoppepan 麵包</b><span class="dchip">Day 5</span></div><p class="ja">hoppepan（ほっぺパン）</p><p class="say">給 5 分，排了 30 分鐘。提醒一週好像只開四天。</p><p class="tip">在浦添市內間，靠近 PARCO CITY。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/261469586">Dcard「沖繩 20 家美食誠實心得：由北到南自駕實測」</a></p></article>
-<article class="eat"><div class="eathead"><span class="et">吃</span><b>雞湯蕎麥麵屋 石工夫（港川）</b><span class="dchip">Day 5</span></div><p class="ja">鶏そば屋 いしぐふー 港川店</p><p class="say">給 4.5 分，雞湯頭清爽，雞肉有舒肥和炙燒兩種口感。</p><p class="tip">在港川外人住宅街裡。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/261469586">Dcard「沖繩 20 家美食誠實心得：由北到南自駕實測」</a></p></article>
-  </div>
-  <h3>購物順路清單</h3>
-  <ul class="shop">
-<li><span class="dchip">Day 2</span><div><b>Bic Camera Select 那霸國際通店</b><span>國際通西端（久茂地 3-29-2），11:00–23:00。觀光客取向的小店，約 350 平方公尺。</span></div></li>
-<li><span class="dchip">Day 2</span><div><b>無印良品 那霸メインプレイス</b><span>おもろまち 4-4-9 サンエー那覇メインプレイス 2 樓，9:00–22:00。從安里的飯店走路約 13 分鐘。</span></div></li>
-<li><span class="dchip">Day 4</span><div><b>寶可夢中心 Okinawa</b><span>イオンモール沖縄ライカム 1 樓，沖繩限定的エイサー皮卡丘。</span></div></li>
-<li><span class="dchip">Day 4</span><div><b>Standard Products</b><span>イオンモール沖縄ライカム 2 樓，10:00–22:00。</span></div></li>
-<li><span class="dchip">Day 4</span><div><b>mont-bell</b><span>イオンモール沖縄ライカム 2 樓，10:00–22:00。</span></div></li>
-<li><span class="dchip">Day 4</span><div><b>GU、UNIQLO</b><span>イオンモール沖縄ライカム，縣內最大級的店面。樓層看現場導覽。</span></div></li>
-<li><span class="dchip">Day 4</span><div><b>Kojima×Bic Camera</b><span>イオンモール沖縄ライカム 3 樓，一般家電。</span></div></li>
-  </ul>
-</section>
-
-<section id="tools" style="scroll-margin-top:60px">
+    </div>
+    <div class="pane" id="pane-log" hidden>
+<section id="tools">
   <h2>共用記錄表</h2>
 
   <div class="facts count">
@@ -929,136 +832,377 @@ button.reset{align-self:flex-start;font:inherit;font-size:14px;color:var(--ink);
 
   <button class="reset" type="button" id="reset">清除這支手機上的勾選與數字</button>
 </section>
+<section>
+  <div class="day" id="ud"><h2>通用設計 UD</h2><span class="date">每天都能找</span><span class="prog" data-prog="ud"></span></div>
+  <p>通用設計（Universal Design）由美國建築師 Ronald Mace 提出。無障礙是替特定對象把既有的障礙拿掉，通用設計是從一開始就做成所有人都好用。沖繩縣的說法是兩者並行：舊的做無障礙，新的用通用設計。</p>
 
-<section id="sources" style="scroll-margin-top:60px">
+  <article class="stop" data-day="ud">
+    <h3>七原則尋寶</h3>
+    <p class="intro">每個原則找一個實例拍下來。飯店、便利商店、單軌電車站、巴士、機場都找得到。</p>
+    <ul class="checks">
+      <li><label><input type="checkbox" id="c-ud-1"><span><b>公平使用</b>　所有人走同一個入口：自動門、與樓梯並排的斜坡</span></label></li>
+      <li><label><input type="checkbox" id="c-ud-2"><span><b>彈性使用</b>　高低兩道扶手、左右手都能操作的設計</span></label></li>
+      <li><label><input type="checkbox" id="c-ud-3"><span><b>簡單直覺</b>　不識字也看得懂的圖示、用顏色區分的路線</span></label></li>
+      <li><label><input type="checkbox" id="c-ud-4"><span><b>資訊明確</b>　導盲磚、有聲號誌、文字加點字加多語的標示</span></label></li>
+      <li><label><input type="checkbox" id="c-ud-5"><span><b>容許錯誤</b>　月台門、防夾的電梯門、形狀不同的馬桶按鈕</span></label></li>
+      <li><label><input type="checkbox" id="c-ud-6"><span><b>省力</b>　下壓式門把、大片式開關、感應水龍頭</span></label></li>
+      <li><label><input type="checkbox" id="c-ud-7"><span><b>尺寸與空間</b>　多功能廁所、寬閘門、位置較低的販賣機投幣口</span></label></li>
+    </ul>
+  </article>
+
+  <article class="stop" data-day="ud">
+    <h3>便利商店裡的通用設計</h3>
+    <p class="intro">日本有些包裝靠觸覺就能分辨內容物，買東西時順手摸摸看。</p>
+    <ul class="checks">
+      <li><label><input type="checkbox" id="c-ud-8"><span>洗髮精瓶身側面的凸紋，用來和潤髮乳區分</span></label></li>
+      <li><label><input type="checkbox" id="c-ud-9"><span>牛奶紙盒頂部的半圓缺口</span></label></li>
+      <li><label><input type="checkbox" id="c-ud-10"><span>酒類罐頂的點字</span></label></li>
+    </ul>
+  </article>
+
+  <div class="facts">
+    <h3>沖繩的背景</h3>
+    <ul>
+      <li>1997 年 4 月施行「福祉のまちづくり条例」，新建築的無障礙逐年改善，條例之前蓋的舊建築仍是課題。</li>
+      <li>2007 年發表「沖繩觀光無障礙宣言」，同年在那霸機場設立身障者與高齡者觀光案內所，是日本第一個設在機場內的這類窗口。</li>
+      <li>機場據點仍在營運：國內線航廈 1 樓抵達大廳、中央電梯對面，10:00–18:00，出借輪椅、嬰兒車與筆談器。11/17 我們 09:30 到機場時還沒開門。</li>
+      <li>行程裡剛好有新舊對比：石疊道與老商店街是舊環境，改建後的牧志市場與 AEON 是新環境。</li>
+    </ul>
+    <p class="tw"><b>對照台灣</b>　捷運與新建公共建築，對上老舊騎樓與公寓。同樣是新的做得到、舊的改不動。</p>
+  </div>
+</section>
+    </div>
+    <div class="pane" id="pane-eat" hidden>
+<section id="happy">
+  <h2>吃喝逛</h2>
+  <p>認真觀察之餘的口袋名單。美食評語全部出自 Dcard 網友的實吃心得，好評負評照原文轉述，「雷」是網友不推的店。營業時間與是否還在營業，出發前請用 Google 地圖再確認。</p>
+  <div class="eats">
+<article class="eat"><div class="eathead"><span class="et">甜</span><b>Yanbaru Gelato（iias 豐崎店）</b><span class="dchip">Day 1</span></div><p class="ja">やんばるジェラート イーアス沖縄豊崎店</p><p class="say">原 po 本來就偏愛 gelato，說這家很合口味，特別推黑芝麻和巧克力。</p><p class="tip">店在 iias 沖繩豐崎商場裡。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/257945079" target="_blank" rel="noopener">Dcard「沖繩 16 家美食分享」</a></p></article>
+<article class="eat"><div class="eathead"><span class="et">吃</span><b>豬肉蛋飯糰本店</b><span class="dchip">Day 2</span></div><p class="ja">ポークたまごおにぎり本店（ポーたま）</p><p class="say">給 4.5 分，說炸蝦塔塔醬口味層次很多。</p><p class="say">另一篇覺得苦瓜口味中規中矩；不愛午餐肉的原 po 覺得普通、味噌醬偏鹹。</p><p class="tip">就在牧志公設市場旁。愛不愛午餐肉是關鍵，常要排隊。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/261469586" target="_blank" rel="noopener">Dcard「沖繩 20 家美食誠實心得：由北到南自駕實測」</a> <a href="https://www.dcard.tw/f/japan_travel/p/259429385" target="_blank" rel="noopener">Dcard「沖繩不自駕 4 天 3 夜 ep.1 觀光客美食巡禮」</a> <a href="https://www.dcard.tw/f/japan_travel/p/257945079" target="_blank" rel="noopener">Dcard「沖繩 16 家美食分享」</a></p></article>
+<article class="eat"><div class="eathead"><span class="et">甜</span><b>Blue Seal 國際通店</b><span class="dchip">Day 2</span></div><p class="ja">ブルーシール 国際通り店</p><p class="say">冰淇淋的海鹽餅乾口味不錯，但國際通店的可麗餅「蠻不推薦」，奶油很膩。</p><p class="say">另一位覺得偏甜，更推 Fontana Gelato（沒有可靠座標，不列）。</p><p class="tip">吃冰淇淋可以，可麗餅先不要。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/257945079" target="_blank" rel="noopener">Dcard「沖繩 16 家美食分享」</a> <a href="https://www.dcard.tw/f/japan_travel/p/261469586" target="_blank" rel="noopener">Dcard「沖繩 20 家美食誠實心得：由北到南自駕實測」</a></p></article>
+<article class="eat"><div class="eathead"><span class="et">喝</span><b>國際通屋台村</b><span class="dchip">Day 2</span></div><p class="ja">国際通り屋台村</p><p class="say">適合體驗居酒屋氣氛，Orion 生啤與泡盛是常見的選擇。地圖網站只看到這篇的摘要。</p><p class="tip">離聚餐的コキヤ與櫻坂劇場都很近，聚餐後續攤順路。</p><p class="srcl">來源：<a href="https://www.dcard.tw/@tsai_tsaizhi/post/259391407" target="_blank" rel="noopener">Dcard 國際通屋台村分享文</a></p></article>
+<article class="eat"><div class="eathead"><span class="et">吃</span><b>燒肉本部牧場 那霸店</b><span class="dchip">Day 2</span></div><p class="ja">焼肉もとぶ牧場 那覇店</p><p class="say">給 4.5 分，要自己烤、牛肉沒先調味，但肉質與份量都很滿意。</p><p class="tip">在縣廳前站附近，從國際通西端走過去。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/261469586" target="_blank" rel="noopener">Dcard「沖繩 20 家美食誠實心得：由北到南自駕實測」</a></p></article>
+<article class="eat bad"><div class="eathead"><span class="et bad">雷</span><b>EIBUN 沖繩麵（排隊提醒）</b><span class="dchip">Day 2</span></div><p class="ja">Okinawa Soba EIBUN</p><p class="say bad">只給 2.5 分。排了一小時，覺得招牌麵味道家常、瘦肉偏柴，冷麵倒清爽。</p><p class="tip">就在壺屋やちむん通旁。這是單一網友的感想。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/261469586" target="_blank" rel="noopener">Dcard「沖繩 20 家美食誠實心得：由北到南自駕實測」</a></p></article>
+<article class="eat"><div class="eathead"><span class="et">甜</span><b>萬座毛的 Blue Seal</b><span class="dchip">Day 3</span></div><p class="ja">万座毛</p><p class="say">原 po 覺得海鹽餅乾口味不錯。</p><p class="tip">在往喜璃癒志飯店的路上，行程沒有排，時間夠才考慮。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/257945079" target="_blank" rel="noopener">Dcard「沖繩 16 家美食分享」</a></p></article>
+<article class="eat"><div class="eathead"><span class="et">吃</span><b>古宇利蝦蝦飯</b><span class="dchip">Day 4</span></div><p class="ja">KOURI SHRIMP</p><p class="say">給 4.5 分，蒜香奶油配辣粉是絕配。</p><p class="say">另一篇取餐等了約半小時，家人覺得是「能想像的味道」。</p><p class="tip">在古宇利島，跟團當天多半去不了。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/261469586" target="_blank" rel="noopener">Dcard「沖繩 20 家美食誠實心得：由北到南自駕實測」</a> <a href="https://www.dcard.tw/f/japan_travel/p/257945079" target="_blank" rel="noopener">Dcard「沖繩 16 家美食分享」</a></p></article>
+<article class="eat"><div class="eathead"><span class="et">吃</span><b>Hoppepan 麵包</b><span class="dchip">Day 5</span></div><p class="ja">hoppepan（ほっぺパン）</p><p class="say">給 5 分，排了 30 分鐘。提醒一週好像只開四天。</p><p class="tip">在浦添市內間，靠近 PARCO CITY。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/261469586" target="_blank" rel="noopener">Dcard「沖繩 20 家美食誠實心得：由北到南自駕實測」</a></p></article>
+<article class="eat"><div class="eathead"><span class="et">吃</span><b>雞湯蕎麥麵屋 石工夫（港川）</b><span class="dchip">Day 5</span></div><p class="ja">鶏そば屋 いしぐふー 港川店</p><p class="say">給 4.5 分，雞湯頭清爽，雞肉有舒肥和炙燒兩種口感。</p><p class="tip">在港川外人住宅街裡。</p><p class="srcl">來源：<a href="https://www.dcard.tw/f/japan_travel/p/261469586" target="_blank" rel="noopener">Dcard「沖繩 20 家美食誠實心得：由北到南自駕實測」</a></p></article>
+  </div>
+  <h3>購物順路清單</h3>
+  <ul class="shop">
+<li><span class="dchip">Day 2</span><div><b>Bic Camera Select 那霸國際通店</b><span>國際通西端（久茂地 3-29-2），11:00–23:00。觀光客取向的小店，約 350 平方公尺。</span></div></li>
+<li><span class="dchip">Day 2</span><div><b>無印良品 那霸メインプレイス</b><span>おもろまち 4-4-9 サンエー那覇メインプレイス 2 樓，9:00–22:00。從安里的飯店走路約 13 分鐘。</span></div></li>
+<li><span class="dchip">Day 4</span><div><b>寶可夢中心 Okinawa</b><span>イオンモール沖縄ライカム 1 樓，沖繩限定的エイサー皮卡丘。</span></div></li>
+<li><span class="dchip">Day 4</span><div><b>Standard Products</b><span>イオンモール沖縄ライカム 2 樓，10:00–22:00。</span></div></li>
+<li><span class="dchip">Day 4</span><div><b>mont-bell</b><span>イオンモール沖縄ライカム 2 樓，10:00–22:00。</span></div></li>
+<li><span class="dchip">Day 4</span><div><b>GU、UNIQLO</b><span>イオンモール沖縄ライカム，縣內最大級的店面。樓層看現場導覽。</span></div></li>
+<li><span class="dchip">Day 4</span><div><b>Kojima×Bic Camera</b><span>イオンモール沖縄ライカム 3 樓，一般家電。</span></div></li>
+  </ul>
+</section>
+    </div>
+    <div class="pane" id="pane-info" hidden>
+<section>
+<div class="eyebrow">臺北市立大學衛生福利學系・UT Learning Force 沖繩移地教學 2026.11.13–11.17</div>
+<h2>沖繩衛福觀察手冊</h2>
+<p class="lede">行程、景點介紹、五感觀察與思考題，加上能用上衛福專業的觀察清單。每一項都靠看、數、拍就能完成，沒有機會訪談也做得出成果。</p>
+<div class="howto"><b>怎麼用這張地圖</b>
+<p>右邊的圓形定位鈕會用手機定位，在地圖上以藍點標出你的位置和面向，每一站也會顯示離你多遠。</p>
+<p>「3D」鈕切換立體與平面。兩指旋轉、兩指上下滑可以改變視角。點圖釘看是哪一站，用 ‹ › 換到上一站或下一站，「導航」會交給 Google 地圖。</p>
+<p>勾選紀錄與計數只存在這支手機上。</p></div>
+</section>
+<section id="frame">
+  <div class="trip">
+    <div><b>去程</b>CI 120　11/13 桃園 08:10 → 那霸 10:50</div>
+    <div><b>回程</b>CI 121　11/17 09:00 飯店出發，09:30 到那霸機場</div>
+    <div><b>住宿</b>11/13–14 皇后飯店（安里）<br>11/15 喜璃癒志飯店（恩納村）<br>11/16 倫勃朗都風格飯店（那霸市西）</div>
+  </div>
+
+  <h2>課程的三個主題</h2>
+  <p>行前說明的主題是「日本沖繩島嶼城市自明性及文化表徵觀察移地研究」，要用五感深度觀察。每個景點都標了對應的主題。</p>
+  <ul class="plain">
+    <li>（一）島嶼城市空間與自明性</li>
+    <li>（二）文化表徵與地方認同</li>
+    <li>（三）島嶼社會發展與社區生活</li>
+  </ul>
+  <div class="legend" aria-label="五感圖示">
+    <span><span class="sense">視</span>視覺</span><span><span class="sense">聽</span>聽覺</span><span><span class="sense">嗅</span>嗅覺</span><span><span class="sense">味</span>味覺</span><span><span class="sense">觸</span>觸覺</span>
+  </div>
+
+  <h2>四條衛福觀察主軸</h2>
+  <p>沖繩曾是日本最長壽的地方，如今排名大幅下滑。我們要看的是長壽的條件還剩下什麼、流失了什麼，以及這跟台灣有多像。</p>
+  <div class="axes">
+    <div class="axis food"><b>食物環境</b><span>人們買得到、吃得到什麼。傳統食材與加工食品各占多少空間。</span></div>
+    <div class="axis age"><b>高齡友善</b><span>長者能不能自己出門、走路、休息、採買。對應 WHO 高齡友善城市的面向。</span></div>
+    <div class="axis soc"><b>社會參與與文化</b><span>長者是否還在工作、聚會、傳承技藝。信仰與習俗如何談健康。</span></div>
+    <div class="axis ud"><b>通用設計 UD</b><span>一開始就設計成所有人都能用的空間、產品與標示。不限長者或身障者。</span></div>
+  </div>
+
+  <div class="facts">
+    <h3>先記住這幾個數字</h3>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>沖繩平均壽命的全國排名</th><th>1980</th><th>1990</th><th>2000</th><th>2010</th><th>2020</th></tr></thead>
+        <tbody>
+          <tr><td>男性</td><td>1</td><td>5</td><td>26</td><td>30</td><td>43</td></tr>
+          <tr><td>女性</td><td>1</td><td>1</td><td>1</td><td>3</td><td>16</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">全日本 47 個都道府縣中的名次。2000 年男性跌到第 26 名，當地稱為「26 衝擊」。</p>
+    <ul>
+      <li>大宜味村高齡化率 40.7%，沖繩全縣 23.5%（2023 年 10 月）。</li>
+      <li>1949 年沖繩人的熱量約 69% 來自地瓜，米只占一成多。</li>
+      <li>下滑的原因多指向飲食西化、肥胖、以車代步與飲酒。</li>
+    </ul>
+  </div>
+</section>
+<section id="sources">
   <h2>資料來源</h2>
   <ul class="src">
-    <li>地圖圖資：<a href="https://openfreemap.org/">OpenFreeMap</a>、© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</li>
-    <li><a href="https://lecture.ronsui.tw/okinawa2026">沖繩移地教學地圖 2026（景點介紹、五感觀察、思考題、行程與美食清單）</a></li>
-    <li><a href="https://www.pref.okinawa.jp/_res/projects/default_project/_page_/001/006/120/r3eiyoutyousa.pdf">沖繩縣 令和 3 年營養調查（平均壽命排名）</a></li>
-    <li><a href="https://www.pref.okinawa.jp/_res/projects/default_project/_page_/001/007/235/40_shiryouhen.pdf">沖繩縣高齡者保健福祉計畫資料編（高齡化率）</a></li>
-    <li><a href="https://www.pref.okinawa.jp/_res/projects/default_project/_page_/001/006/586/s43-129-135_1.pdf">沖繩縣 平均壽命推移研究（26 衝擊）</a></li>
-    <li><a href="https://ryukyushimpo.jp/editorial/prentry-247150.html">琉球新報社論：長壽下滑的原因</a></li>
-    <li><a href="https://forksoverknives.com/longevity-diet">1949 年沖繩飲食熱量來源</a></li>
-    <li><a href="https://ontrip.jal.co.jp/okinawa/17514785">大宜味村 1993 年長壽宣言</a></li>
-    <li><a href="https://ryukyushimpo.jp/gourmet/entry-1493978.html">琉球新報：わーけーまちや</a></li>
-    <li><a href="https://www.foodnext.net/life/culture/paper/5111391316">食力：琉球與福建的往來</a></li>
-    <li><a href="https://www.pref.okinawa.jp/kensei/shisaku/1014203/1014206/1014207.html">沖繩縣：通用設計與無障礙的差別</a></li>
-    <li><a href="https://www.mlit.go.jp/sogoseisaku/barrierfree/sosei_barrierfree_tk_000052.html">國土交通省：身障者與高齡者觀光案內所</a></li>
-    <li><a href="https://www.pref.okinawa.lg.jp/_res/projects/default_project/_page_/001/036/156/online_setsuguu.pdf">沖繩縣：2007 年觀光無障礙宣言</a></li>
-    <li><a href="https://www.pref.okinawa.lg.jp/_res/projects/default_project/_page_/001/019/506/1-7-a.pdf">沖繩縣：福祉のまちづくり条例的推動狀況</a></li>
-    <li><a href="https://www.jal.co.jp/jp/ja/domtour/jaldp/universal_journey/index03.html">JAL：沖繩設有通用客房的飯店</a></li>
-    <li><a href="https://www.naha-airport.co.jp/service/assist/bftourcenter/">那霸機場：身障者與高齡者觀光案內所</a></li>
-    <li><a href="http://barifuri-okinawa.org/BFtourcenter/">沖繩無障礙觀光中心（バリアフリーネットワーク会議）</a></li>
-    <li><a href="https://www.gltjp.com/ja/directory/item/13318/">那霸市觀光案內所</a></li>
-    <li><a href="https://www.daiso-sangyo.co.jp/shop/detail/001527">大創：Standard Products イオンモール沖縄ライカム店</a></li>
-    <li><a href="https://store.montbell.jp/search/shopinfo/?shop_no=678533">mont-bell 沖縄ライカム店</a></li>
-    <li><a href="https://www.biccamera.co.jp/pdf/news/2026/20260401.pdf">Bic Camera Select 那霸國際通店開幕新聞稿</a></li>
-    <li><a href="https://www.muji.com/jp/ja/shop/061768">無印良品 那覇メインプレイス</a></li>
+    <li>地圖圖資：<a href="https://openfreemap.org/" target="_blank" rel="noopener">OpenFreeMap</a>（3D 建築）、地形 Mapzen Terrain Tiles、© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</li>
+    <li><a href="https://lecture.ronsui.tw/okinawa2026" target="_blank" rel="noopener">沖繩移地教學地圖 2026（景點介紹、五感觀察、思考題、行程與美食清單）</a></li>
+    <li><a href="https://www.pref.okinawa.jp/_res/projects/default_project/_page_/001/006/120/r3eiyoutyousa.pdf" target="_blank" rel="noopener">沖繩縣 令和 3 年營養調查（平均壽命排名）</a></li>
+    <li><a href="https://www.pref.okinawa.jp/_res/projects/default_project/_page_/001/007/235/40_shiryouhen.pdf" target="_blank" rel="noopener">沖繩縣高齡者保健福祉計畫資料編（高齡化率）</a></li>
+    <li><a href="https://www.pref.okinawa.jp/_res/projects/default_project/_page_/001/006/586/s43-129-135_1.pdf" target="_blank" rel="noopener">沖繩縣 平均壽命推移研究（26 衝擊）</a></li>
+    <li><a href="https://ryukyushimpo.jp/editorial/prentry-247150.html" target="_blank" rel="noopener">琉球新報社論：長壽下滑的原因</a></li>
+    <li><a href="https://forksoverknives.com/longevity-diet" target="_blank" rel="noopener">1949 年沖繩飲食熱量來源</a></li>
+    <li><a href="https://ontrip.jal.co.jp/okinawa/17514785" target="_blank" rel="noopener">大宜味村 1993 年長壽宣言</a></li>
+    <li><a href="https://ryukyushimpo.jp/gourmet/entry-1493978.html" target="_blank" rel="noopener">琉球新報：わーけーまちや</a></li>
+    <li><a href="https://www.foodnext.net/life/culture/paper/5111391316" target="_blank" rel="noopener">食力：琉球與福建的往來</a></li>
+    <li><a href="https://www.pref.okinawa.jp/kensei/shisaku/1014203/1014206/1014207.html" target="_blank" rel="noopener">沖繩縣：通用設計與無障礙的差別</a></li>
+    <li><a href="https://www.mlit.go.jp/sogoseisaku/barrierfree/sosei_barrierfree_tk_000052.html" target="_blank" rel="noopener">國土交通省：身障者與高齡者觀光案內所</a></li>
+    <li><a href="https://www.pref.okinawa.lg.jp/_res/projects/default_project/_page_/001/036/156/online_setsuguu.pdf" target="_blank" rel="noopener">沖繩縣：2007 年觀光無障礙宣言</a></li>
+    <li><a href="https://www.pref.okinawa.lg.jp/_res/projects/default_project/_page_/001/019/506/1-7-a.pdf" target="_blank" rel="noopener">沖繩縣：福祉のまちづくり条例的推動狀況</a></li>
+    <li><a href="https://www.jal.co.jp/jp/ja/domtour/jaldp/universal_journey/index03.html" target="_blank" rel="noopener">JAL：沖繩設有通用客房的飯店</a></li>
+    <li><a href="https://www.naha-airport.co.jp/service/assist/bftourcenter/" target="_blank" rel="noopener">那霸機場：身障者與高齡者觀光案內所</a></li>
+    <li><a href="http://barifuri-okinawa.org/BFtourcenter/" target="_blank" rel="noopener">沖繩無障礙觀光中心（バリアフリーネットワーク会議）</a></li>
+    <li><a href="https://www.gltjp.com/ja/directory/item/13318/" target="_blank" rel="noopener">那霸市觀光案內所</a></li>
+    <li><a href="https://www.daiso-sangyo.co.jp/shop/detail/001527" target="_blank" rel="noopener">大創：Standard Products イオンモール沖縄ライカム店</a></li>
+    <li><a href="https://store.montbell.jp/search/shopinfo/?shop_no=678533" target="_blank" rel="noopener">mont-bell 沖縄ライカム店</a></li>
+    <li><a href="https://www.biccamera.co.jp/pdf/news/2026/20260401.pdf" target="_blank" rel="noopener">Bic Camera Select 那霸國際通店開幕新聞稿</a></li>
+    <li><a href="https://www.muji.com/jp/ja/shop/061768" target="_blank" rel="noopener">無印良品 那覇メインプレイス</a></li>
   </ul>
   <p class="note">景點介紹、五感觀察與思考題取自上方的地圖網站。博物館展區、首里城無障礙路線、長壽宣言碑的位置、首里城正殿開放日期與那霸巴士總站窗口的現況未經我們查證，請以現場為準。</p>
 </section>
+    </div>
+  </div>
+</aside>
 
-</div>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script>
+const PTS=[{"k": "airport", "d": 1, "n": 1, "name": "那霸機場", "lat": 26.206289, "lng": 127.651171}, {"k": "senaga", "d": 1, "n": 2, "name": "瀨長島 Umikaji Terrace", "lat": 26.176388, "lng": 127.640405}, {"k": "navy", "d": 1, "n": 3, "name": "舊海軍司令部壕", "lat": 26.186191, "lng": 127.676714}, {"k": "toyosaki", "d": 1, "n": 4, "name": "豐崎海濱新市鎮", "lat": 26.157108, "lng": 127.651707}, {"k": "queen", "d": 1, "n": 5, "name": "皇后飯店（第一、二晚）", "lat": 26.218262, "lng": 127.694275}, {"k": "kokusai", "d": 2, "n": 1, "name": "國際通", "lat": 26.216329, "lng": 127.689219}, {"k": "makishi", "d": 2, "n": 2, "name": "第一牧志公設市場", "lat": 26.214546, "lng": 127.688288}, {"k": "heiwa", "d": 2, "n": 3, "name": "平和通商店街", "lat": 26.214979, "lng": 127.688766}, {"k": "tsuboya", "d": 2, "n": 4, "name": "壺屋やちむん通", "lat": 26.212911, "lng": 127.691806}, {"k": "sakura", "d": 2, "n": 5, "name": "櫻坂劇場", "lat": 26.214744, "lng": 127.690128}, {"k": "kokiya", "d": 2, "n": 6, "name": "コキヤ火鍋（師生聚餐）", "lat": 26.216497, "lng": 127.689125}, {"k": "naminoue", "d": 3, "n": 1, "name": "波上宮", "lat": 26.220559, "lng": 127.671135}, {"k": "okimu", "d": 3, "n": 2, "name": "沖繩縣立博物館・美術館", "lat": 26.227158, "lng": 127.693717}, {"k": "gyokusen", "d": 3, "n": 3, "name": "玉泉洞王國村", "lat": 26.140358, "lng": 127.749455}, {"k": "shuri", "d": 3, "n": 4, "name": "首里城", "lat": 26.217001, "lng": 127.719372}, {"k": "shurei", "d": 3, "n": 5, "name": "守禮門", "lat": 26.218147, "lng": 127.71689}, {"k": "ishidatami", "d": 3, "n": 6, "name": "首里金城町石疊道", "lat": 26.215327, "lng": 127.714766}, {"k": "kariyushi", "d": 3, "n": 7, "name": "喜璃癒志飯店（第三晚）", "lat": 26.525948, "lng": 127.930051}, {"k": "ogimi", "d": 4, "n": 1, "name": "大宜味村農村活性化中心（本次重點）", "lat": 26.690217, "lng": 128.108039}, {"k": "nakijin", "d": 4, "n": 2, "name": "今歸仁城跡", "lat": 26.690889, "lng": 127.929733}, {"k": "bise", "d": 4, "n": 3, "name": "備瀨福木林道", "lat": 26.701416, "lng": 127.880036}, {"k": "rycom", "d": 4, "n": 4, "name": "永旺夢樂城沖繩來客夢", "lat": 26.314226, "lng": 127.79592}, {"k": "rembrandt", "d": 4, "n": 5, "name": "倫勃朗都風格飯店（第四晚）", "lat": 26.213451, "lng": 127.667852}, {"k": "airport5", "d": 5, "n": 1, "name": "那霸機場（返臺）", "lat": 26.206289, "lng": 127.651171}, {"k": "urasoe", "d": 5, "n": 2, "name": "浦添城跡與浦添ようどれ", "lat": 26.248119, "lng": 127.730591}, {"k": "minatogawa", "d": 5, "n": 3, "name": "港川外人住宅街", "lat": 26.262501, "lng": 127.714599}];
 (function(){
+  var DC={1:'#1689d6',2:'#ef5a4c',3:'#8a5cf0',4:'#2a9d55',5:'#e38b00'};
+  var DATES={1:'2026-11-13',2:'2026-11-14',3:'2026-11-15',4:'2026-11-16',5:'2026-11-17'};
+  var TITLE={1:'抵達與豐見城市周邊',2:'國際通散策',3:'琉球王國與文化保存',4:'山原聚落與北山王城',5:'返臺'};
+  var $=function(s,r){return (r||document).querySelector(s);}, $$=function(s,r){return [].slice.call((r||document).querySelectorAll(s));};
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function gd(p){return 'https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng+'&travelmode=walking';}
+  function byK(k){return PTS.filter(function(p){return p.k===k;})[0];}
+
+  /* ---------- 勾選與計數（存在這支手機） ---------- */
   var KEY='okinawa-dhw-guide-v1', state={};
   try{ state=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ state={}; }
   function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
-  var boxes=[].slice.call(document.querySelectorAll('.checks input'));
-  var nums=[].slice.call(document.querySelectorAll('.count input'));
+  var boxes=$$('.checks input'), nums=$$('.count input');
   function progress(){
-    [].forEach.call(document.querySelectorAll('[data-prog]'),function(el){
-      var d=el.getAttribute('data-prog');
-      var all=document.querySelectorAll('.stop[data-day="'+d+'"] .checks input');
-      if(!all.length){ el.textContent=''; return; }
-      var done=[].filter.call(all,function(i){return i.checked}).length;
-      el.textContent='完成 '+done+' / '+all.length;
+    $$('[data-prog]').forEach(function(el){
+      var all=$$('.stop[data-day="'+el.getAttribute('data-prog')+'"] .checks input');
+      el.textContent=all.length?'完成 '+all.filter(function(i){return i.checked;}).length+' / '+all.length:'';
     });
+    renderPeek();
   }
-  boxes.forEach(function(b){
-    b.checked=!!state[b.id];
-    b.addEventListener('change',function(){ state[b.id]=b.checked; save(); progress(); });
+  boxes.forEach(function(b){ b.checked=!!state[b.id]; b.addEventListener('change',function(){ state[b.id]=b.checked; save(); progress(); }); });
+  nums.forEach(function(n){ if(state[n.id]!==undefined) n.value=state[n.id]; n.addEventListener('input',function(){ state[n.id]=n.value; save(); }); });
+  var armed=false, rb=$('#reset');
+  rb.addEventListener('click',function(){
+    if(!armed){ armed=true; rb.textContent='再按一次確認清除'; return; }
+    state={}; save(); boxes.forEach(function(b){b.checked=false;}); nums.forEach(function(n){n.value='';});
+    armed=false; rb.textContent='清除這支手機上的勾選與數字'; progress();
   });
-  nums.forEach(function(n){
-    if(state[n.id]!==undefined) n.value=state[n.id];
-    n.addEventListener('input',function(){ state[n.id]=n.value; save(); });
-  });
-  var armed=false, btn=document.getElementById('reset');
-  btn.addEventListener('click',function(){
-    if(!armed){ armed=true; btn.textContent='再按一次確認清除'; return; }
-    state={}; save();
-    boxes.forEach(function(b){b.checked=false});
-    nums.forEach(function(n){n.value=''});
-    armed=false; btn.textContent='清除這支手機上的勾選與數字'; progress();
-  });
-  [].forEach.call(document.querySelectorAll('nav a'),function(a){
-    a.addEventListener('click',function(e){
-      var t=document.getElementById(a.getAttribute('href').slice(1));
-      if(t){ e.preventDefault(); t.scrollIntoView(); }
-    });
-  });
-  function goHash(){ var h=location.hash.slice(1); var t=h&&document.getElementById(h); if(t) t.scrollIntoView(); }
-  window.addEventListener('hashchange',goHash);
-  progress(); goHash();
-})();
 
-const PTS=[{"k": "airport", "d": 1, "n": 1, "name": "那霸機場", "lat": 26.206289, "lng": 127.651171}, {"k": "senaga", "d": 1, "n": 2, "name": "瀨長島 Umikaji Terrace", "lat": 26.176388, "lng": 127.640405}, {"k": "navy", "d": 1, "n": 3, "name": "舊海軍司令部壕", "lat": 26.186191, "lng": 127.676714}, {"k": "toyosaki", "d": 1, "n": 4, "name": "豐崎海濱新市鎮", "lat": 26.157108, "lng": 127.651707}, {"k": "queen", "d": 1, "n": 5, "name": "皇后飯店（第一、二晚）", "lat": 26.218262, "lng": 127.694275}, {"k": "kokusai", "d": 2, "n": 1, "name": "國際通", "lat": 26.216329, "lng": 127.689219}, {"k": "makishi", "d": 2, "n": 2, "name": "第一牧志公設市場", "lat": 26.214546, "lng": 127.688288}, {"k": "heiwa", "d": 2, "n": 3, "name": "平和通商店街", "lat": 26.214979, "lng": 127.688766}, {"k": "tsuboya", "d": 2, "n": 4, "name": "壺屋やちむん通", "lat": 26.212911, "lng": 127.691806}, {"k": "sakura", "d": 2, "n": 5, "name": "櫻坂劇場", "lat": 26.214744, "lng": 127.690128}, {"k": "kokiya", "d": 2, "n": 6, "name": "コキヤ火鍋（師生聚餐）", "lat": 26.216497, "lng": 127.689125}, {"k": "naminoue", "d": 3, "n": 1, "name": "波上宮", "lat": 26.220559, "lng": 127.671135}, {"k": "okimu", "d": 3, "n": 2, "name": "沖繩縣立博物館・美術館", "lat": 26.227158, "lng": 127.693717}, {"k": "gyokusen", "d": 3, "n": 3, "name": "玉泉洞王國村", "lat": 26.140358, "lng": 127.749455}, {"k": "shuri", "d": 3, "n": 4, "name": "首里城", "lat": 26.217001, "lng": 127.719372}, {"k": "shurei", "d": 3, "n": 5, "name": "守禮門", "lat": 26.218147, "lng": 127.71689}, {"k": "ishidatami", "d": 3, "n": 6, "name": "首里金城町石疊道", "lat": 26.215327, "lng": 127.714766}, {"k": "kariyushi", "d": 3, "n": 7, "name": "喜璃癒志飯店（第三晚）", "lat": 26.525948, "lng": 127.930051}, {"k": "ogimi", "d": 4, "n": 1, "name": "大宜味村農村活性化中心（本次重點）", "lat": 26.690217, "lng": 128.108039}, {"k": "nakijin", "d": 4, "n": 2, "name": "今歸仁城跡", "lat": 26.690889, "lng": 127.929733}, {"k": "bise", "d": 4, "n": 3, "name": "備瀨福木林道", "lat": 26.701416, "lng": 127.880036}, {"k": "rycom", "d": 4, "n": 4, "name": "永旺夢樂城沖繩來客夢", "lat": 26.314226, "lng": 127.79592}, {"k": "rembrandt", "d": 4, "n": 5, "name": "倫勃朗都風格飯店（第四晚）", "lat": 26.213451, "lng": 127.667852}, {"k": "airport5", "d": 5, "n": 1, "name": "那霸機場（返臺）", "lat": 26.206289, "lng": 127.651171}, {"k": "urasoe", "d": 5, "n": 2, "name": "浦添城跡與浦添ようどれ", "lat": 26.248119, "lng": 127.730591}, {"k": "minatogawa", "d": 5, "n": 3, "name": "港川外人住宅街", "lat": 26.262501, "lng": 127.714599}];
-(function(){
-  var info=document.getElementById('mapinfo'), L=document.getElementById('maplist');
-  var VIEWS={island:[127.60,26.10,128.32,26.76],naha:[127.625,26.13,127.775,26.27],kokusai:[127.6855,26.2105,127.6965,26.2195]};
-  var day=0, sel=null, me=null, meMk=null, watch=null, map=null, MK={};
-  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-  function gd(p){return 'https://www.google.com/maps/dir/?api=1&destination='+p.lat+','+p.lng+'&travelmode=walking';}
+  /* ---------- 每一站卡片加上編號與距離 ---------- */
+  PTS.forEach(function(p){
+    var a=document.getElementById('s-'+p.k); if(!a) return;
+    a.style.setProperty('--dc',DC[p.d]);
+    var h=$('h3',a); h.insertAdjacentHTML('afterbegin','<span class="n">'+p.n+'</span>');
+    h.insertAdjacentHTML('beforeend','<span class="dist" data-k="'+p.k+'"></span>');
+  });
+  $$('.daysec').forEach(function(s){ s.style.setProperty('--dc',DC[s.getAttribute('data-d')]); });
+
+  /* ---------- 狀態 ---------- */
+  var today=(function(){ var d=new Date(), s=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    for(var k in DATES) if(DATES[k]===s) return +k; return 0; })();
+  var day=today, sel=null, me=null, is3D=true, map=null, geo=null, MK={};
+  $('#sub').textContent=today?'今天是 Day '+today+'・'+TITLE[today]:'2026.11.13–11.17　移地教學';
+
   function dist(p){ if(!me) return ''; var R=6371000,t=Math.PI/180,dl=(p.lat-me[1])*t,dg=(p.lng-me[0])*t;
     var a=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(me[1]*t)*Math.cos(p.lat*t)*Math.sin(dg/2)*Math.sin(dg/2);
     var m=2*R*Math.asin(Math.sqrt(a)); return m<1000?Math.round(m/10)*10+' 公尺':(m/1000).toFixed(m<10000?1:0)+' 公里'; }
   function shown(){ return PTS.filter(function(p){return !day||p.d===day;}); }
-  function list(){ L.innerHTML='';
-    shown().forEach(function(p){ var li=document.createElement('li'), bt=document.createElement('button'); bt.type='button';
-      bt.className='dk'+p.d+(sel===p.k?' on':''); bt.innerHTML='<span class="mn">'+p.n+'</span><span>Day '+p.d+'　'+esc(p.name)+'</span><span class="dist">'+dist(p)+'</span>';
-      bt.addEventListener('click',function(){pick(p.k,true);}); li.appendChild(bt); L.appendChild(li); }); }
-  function pick(k,fly){
-    sel=k; var p=PTS.filter(function(x){return x.k===k;})[0];
-    for(var key in MK) MK[key].getElement().classList.toggle('sel',key===k);
-    var d=dist(p);
-    info.innerHTML='<b>Day '+p.d+'・第 '+p.n+' 站　'+esc(p.name)+(d?'（距離你 '+d+'）':'')+'</b><span class="go"><a href="#s-'+p.k+'" class="jump">看介紹</a><a href="'+esc(gd(p))+'" target="_blank" rel="noopener">從我的位置導航</a></span>';
-    info.querySelector('.jump').addEventListener('click',function(e){e.preventDefault();var t=document.getElementById('s-'+p.k);if(t)t.scrollIntoView();});
-    if(fly&&map) map.flyTo({center:[p.lng,p.lat],zoom:Math.max(map.getZoom(),15)});
-    list();
-  }
-  function fit(b){ if(map) map.fitBounds([[b[0],b[1]],[b[2],b[3]]],{padding:30,duration:700}); }
-  function fitPts(pts){ if(!map||!pts.length) return; var b=[180,90,-180,-90]; pts.forEach(function(p){b[0]=Math.min(b[0],p.lng);b[1]=Math.min(b[1],p.lat);b[2]=Math.max(b[2],p.lng);b[3]=Math.max(b[3],p.lat);});
-    if(b[2]-b[0]<0.004){b[0]-=0.004;b[2]+=0.004;b[1]-=0.003;b[3]+=0.003;} fit(b); }
-  function press(attr,val){[].forEach.call(document.querySelectorAll('.mapbar [data-'+attr+']'),function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-'+attr))===String(val));});}
-  function filter(){ PTS.forEach(function(p){ if(MK[p.k]) MK[p.k].getElement().style.display=(!day||p.d===day)?'':'none'; }); list(); }
-  try{
-    map=new maplibregl.Map({container:'gmap',style:'https://tiles.openfreemap.org/styles/liberty',bounds:[[VIEWS.naha[0],VIEWS.naha[1]],[VIEWS.naha[2],VIEWS.naha[3]]],attributionControl:{compact:true}});
-    map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
-    PTS.forEach(function(p){ var e=document.createElement('div'); e.className='mk dk'+p.d; e.textContent=p.n; e.title='Day '+p.d+' '+p.name;
-      e.addEventListener('click',function(ev){ev.stopPropagation();pick(p.k,false);});
-      MK[p.k]=new maplibregl.Marker({element:e}).setLngLat([p.lng,p.lat]).addTo(map); });
-  }catch(e){ map=null; document.getElementById('gmap').innerHTML='<p class="mapfail">地圖載入失敗，請確認網路連線。下方清單與導航按鈕仍可使用。</p>'; }
-  [].forEach.call(document.querySelectorAll('.mapbar [data-view]'),function(b){b.addEventListener('click',function(){press('view',b.getAttribute('data-view'));fit(VIEWS[b.getAttribute('data-view')]);});});
-  [].forEach.call(document.querySelectorAll('.mapbar [data-day]'),function(b){b.addEventListener('click',function(){day=+b.getAttribute('data-day');press('day',day);press('view','');filter();fitPts(shown());});});
-  [].forEach.call(document.querySelectorAll('.onmap'),function(b){b.addEventListener('click',function(){
-    day=0; press('day',0); filter(); document.getElementById('mapsec').scrollIntoView(); pick(b.getAttribute('data-key'),true);});});
-  var lb=document.getElementById('locate'), first=true;
-  lb.addEventListener('click',function(){
-    if(watch!==null){ navigator.geolocation.clearWatch(watch); watch=null; me=null; if(meMk){meMk.remove();meMk=null;} lb.setAttribute('aria-pressed','false'); lb.textContent='顯示我的位置'; list(); return; }
-    if(!navigator.geolocation){ info.textContent='這個瀏覽器不支援定位。'; return; }
-    lb.textContent='定位中…'; first=true;
-    watch=navigator.geolocation.watchPosition(function(pos){
-      me=[pos.coords.longitude,pos.coords.latitude]; lb.setAttribute('aria-pressed','true'); lb.textContent='停止定位';
-      if(map){ if(!meMk){ var e=document.createElement('div'); e.className='me'; meMk=new maplibregl.Marker({element:e}).setLngLat(me).addTo(map);} else meMk.setLngLat(me);
-        if(first){ map.flyTo({center:me,zoom:Math.max(map.getZoom(),15)}); first=false; } }
-      list(); if(sel) pick(sel,false);
-    },function(err){ if(watch!==null) navigator.geolocation.clearWatch(watch); watch=null; lb.setAttribute('aria-pressed','false'); lb.textContent='顯示我的位置';
-      info.textContent=err.code===1?'定位被拒絕了。請到瀏覽器或手機設定允許這個網站使用位置。':'暫時抓不到位置，請到戶外或稍後再試。'; },
-    {enableHighAccuracy:true,maximumAge:10000,timeout:20000});
+
+  /* ---------- 抽屜 ---------- */
+  var sheet=$('#sheet'), grab=$('#grab'), panel=$('#panel'), cur='peek', snaps=null;
+  function wide(){ return window.matchMedia('(min-width:900px)').matches; }
+  function measure(){ var H=sheet.offsetHeight, ph=grab.offsetHeight+8;
+    snaps={peek:Math.max(0,H-ph), half:Math.max(0,H-Math.round(window.innerHeight*0.55)), full:0};
+    if(snaps.half>snaps.peek) snaps.half=snaps.peek; }
+  function snap(n){ cur=n; if(wide()){ sheet.style.transform=''; return; } measure(); sheet.style.transform='translateY('+snaps[n]+'px)'; }
+  function visible(){ if(wide()||!snaps) return 0; return sheet.offsetHeight-snaps[cur]; }
+  function pad(){ if(wide()) return {top:110,bottom:40,left:480,right:90};
+    return {top:150,bottom:Math.min(visible(),window.innerHeight*0.6)+20,left:30,right:80}; }
+  var drag=null;
+  grab.addEventListener('pointerdown',function(e){
+    if(wide()||e.target.closest('button,a,input')) return;
+    measure(); drag={y:e.clientY,t:Date.now(),base:snaps[cur],moved:false,last:snaps[cur]};
+    sheet.classList.add('dragging'); try{grab.setPointerCapture(e.pointerId);}catch(x){}
   });
-  list();
+  grab.addEventListener('pointermove',function(e){ if(!drag) return; var dy=e.clientY-drag.y;
+    if(Math.abs(dy)>5) drag.moved=true; drag.last=Math.min(snaps.peek,Math.max(0,drag.base+dy));
+    sheet.style.transform='translateY('+drag.last+'px)'; });
+  function endDrag(e){ if(!drag) return; sheet.classList.remove('dragging');
+    var d=drag; drag=null;
+    if(!d.moved){ snap(cur==='peek'?'half':'peek'); return; }
+    var v=(e.clientY-d.y)/Math.max(1,Date.now()-d.t), order=['full','half','peek'];
+    var best=order.reduce(function(a,b){ return Math.abs(snaps[b]-d.last)<Math.abs(snaps[a]-d.last)?b:a; });
+    if(v>0.6) best=order[Math.min(2,order.indexOf(cur)+1)]; else if(v<-0.6) best=order[Math.max(0,order.indexOf(cur)-1)];
+    snap(best); }
+  grab.addEventListener('pointerup',endDrag); grab.addEventListener('pointercancel',endDrag);
+  window.addEventListener('resize',function(){ snap(cur); });
+
+  /* ---------- 分頁 ---------- */
+  function setTab(id){ $$('.tab').forEach(function(t){ var on=t.getAttribute('data-tab')===id; t.setAttribute('aria-selected',String(on)); });
+    $$('.pane').forEach(function(p){ p.hidden=p.id!=='pane-'+id; }); panel.scrollTop=0; }
+  $$('.tab').forEach(function(t){ t.addEventListener('click',function(){ setTab(t.getAttribute('data-tab')); if(cur==='peek') snap('half'); }); });
+
+  /* ---------- 摘要卡 ---------- */
+  var peek=$('#peek');
+  function renderPeek(){
+    if(!peek) return;
+    if(sel){
+      var p=byK(sel), list=shown(), i=list.indexOf(p), d=dist(p);
+      peek.innerHTML='<div class="pk-top"><span class="pk-day" style="--dc:'+DC[p.d]+'">Day '+p.d+'・第 '+p.n+' 站</span>'+(d?'<span class="pk-dist">距離你 '+d+'</span>':'')+'</div>'+
+        '<div class="pk-name">'+esc(p.name)+'</div>'+
+        '<div class="pk-act"><button type="button" class="btn ico" id="pk-prev" aria-label="上一站"'+(i<=0?' disabled':'')+'>‹</button>'+
+        '<button type="button" class="btn pri" id="pk-more">看介紹與觀察</button>'+
+        '<a class="btn sec" href="'+esc(gd(p))+'" target="_blank" rel="noopener">導航</a>'+
+        '<button type="button" class="btn ico" id="pk-next" aria-label="下一站"'+(i<0||i>=list.length-1?' disabled':'')+'>›</button></div>';
+      $('#pk-more').addEventListener('click',function(){ openDetail(sel); });
+      $('#pk-prev').addEventListener('click',function(){ if(i>0) select(list[i-1].k,true); });
+      $('#pk-next').addEventListener('click',function(){ if(i<list.length-1) select(list[i+1].k,true); });
+    } else {
+      var all=$$('.checks input'), done=all.filter(function(x){return x.checked;}).length;
+      var head=day?'Day '+day+'・'+TITLE[day]:'沖繩移地教學 五天行程';
+      peek.innerHTML='<div class="pk-top"><span class="pk-day" style="--dc:'+(day?DC[day]:'var(--sea)')+'">'+(day?DATES[day].slice(5).replace('-','/'):'11/13–11/17')+'</span><span class="pk-dist">衛福觀察完成 '+done+' / '+all.length+'</span></div>'+
+        '<div class="pk-name">'+head+'</div><div class="pk-sub">點地圖上的圖釘看是哪一站，或把這張卡往上拉看完整行程。</div>';
+    }
+    if(snaps) snap(cur);
+  }
+
+  /* ---------- 篩選日期 ---------- */
+  function setDay(d,fit){
+    day=d; $$('.chip[data-day]').forEach(function(b){ b.setAttribute('aria-pressed',String(+b.getAttribute('data-day')===d)); });
+    $$('.daysec').forEach(function(s){ s.hidden=!!d && +s.getAttribute('data-d')!==d; });
+    PTS.forEach(function(p){ if(MK[p.k]) MK[p.k].getElement().style.display=(!d||p.d===d)?'':'none'; });
+    if(sel && d && byK(sel).d!==d) select(null);
+    updateRoutes(); renderPeek(); if(fit) fitPts(shown());
+  }
+  $$('.chip[data-day]').forEach(function(b){ b.addEventListener('click',function(){ setDay(+b.getAttribute('data-day'),true); }); });
+
+  /* ---------- 選取一站 ---------- */
+  function select(k,fly){
+    sel=k;
+    for(var key in MK){ var el=MK[key].getElement(); el.classList.toggle('sel',key===k); el.style.zIndex=key===k?'3':''; }
+    $$('.stop.cur').forEach(function(a){a.classList.remove('cur');});
+    if(k){ var a=document.getElementById('s-'+k); if(a) a.classList.add('cur'); }
+    renderPeek();
+    if(k&&fly&&map){ var p=byK(k); map.flyTo({center:[p.lng,p.lat],zoom:Math.max(map.getZoom(),16.2),pitch:is3D?60:0,padding:pad(),duration:1400,essential:true}); }
+  }
+  function openDetail(k){
+    var p=byK(k); setTab('trip'); if(day&&day!==p.d) setDay(p.d,false);
+    snap('full');
+    setTimeout(function(){ var a=document.getElementById('s-'+k); if(a) panel.scrollTop=a.offsetTop-panel.offsetTop-12; },60);
+  }
+  $$('.onmap').forEach(function(b){ b.addEventListener('click',function(){ var k=b.getAttribute('data-key'); if(day&&byK(k).d!==day) setDay(0,false); snap('peek'); select(k,true); }); });
+
+  /* ---------- 距離 ---------- */
+  function updateDist(){ $$('.stop .dist').forEach(function(s){ var p=byK(s.getAttribute('data-k')); s.textContent=p?dist(p):''; }); renderPeek(); }
+
+  /* ---------- 地圖 ---------- */
+  var toastT=null;
+  function toast(msg){ var t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('show');},3500); }
+  function fitPts(pts){ if(!map||!pts.length) return; var b=[180,90,-180,-90];
+    pts.forEach(function(p){b[0]=Math.min(b[0],p.lng);b[1]=Math.min(b[1],p.lat);b[2]=Math.max(b[2],p.lng);b[3]=Math.max(b[3],p.lat);});
+    if(b[2]-b[0]<0.004){b[0]-=0.004;b[2]+=0.004;b[1]-=0.003;b[3]+=0.003;}
+    map.fitBounds([[b[0],b[1]],[b[2],b[3]]],{padding:pad(),maxZoom:17.3,pitch:is3D?50:0,duration:1200}); }
+  function routes(){ var f=[]; [1,2,3,4,5].forEach(function(d){ var c=PTS.filter(function(p){return p.d===d;}).map(function(p){return [p.lng,p.lat];});
+      if(c.length>1) f.push({type:'Feature',properties:{c:DC[d],o:(!day||day===d)?(day?0.9:0.55):0},geometry:{type:'LineString',coordinates:c}}); });
+    return {type:'FeatureCollection',features:f}; }
+  function updateRoutes(){ if(map&&map.getSource&&map.getSource('routes')) map.getSource('routes').setData(routes()); }
+  function apply3D(){
+    var b=$('#f3d'); b.textContent=is3D?'3D':'2D'; b.classList.toggle('on',is3D); b.setAttribute('aria-label',is3D?'切換成平面地圖':'切換成立體地圖');
+    if(!map) return;
+    try{ map.setTerrain(is3D&&map.getSource('dem')?{source:'dem',exaggeration:1.5}:null); }catch(e){}
+    map.easeTo({pitch:is3D?60:0,bearing:is3D?(map.getBearing()||-18):0,duration:900,padding:pad()});
+  }
+  function setup(){
+    var layers=map.getStyle().layers, firstSym=layers.filter(function(l){return l.type==='symbol';})[0];
+    try{
+      map.addSource('dem',{type:'raster-dem',tiles:['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],encoding:'terrarium',tileSize:256,maxzoom:14,attribution:'地形：Mapzen Terrain Tiles'});
+      map.addLayer({id:'hills',type:'hillshade',source:'dem',paint:{'hillshade-exaggeration':0.3,'hillshade-shadow-color':'#6f8f9c','hillshade-highlight-color':'#ffffff'}},firstSym&&firstSym.id);
+    }catch(e){}
+    if(!layers.some(function(l){return l.type==='fill-extrusion';})){
+      try{ map.addLayer({id:'b3d',type:'fill-extrusion',source:'openmaptiles','source-layer':'building',minzoom:14,
+        paint:{'fill-extrusion-color':'#efe6da','fill-extrusion-height':['coalesce',['get','render_height'],8],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':0.9}},firstSym&&firstSym.id); }catch(e){}
+    }
+    try{
+      map.addSource('routes',{type:'geojson',data:routes()});
+      map.addLayer({id:'routes',type:'line',source:'routes',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':['get','c'],'line-width':4,'line-opacity':['get','o'],'line-dasharray':[1.2,1.6]}},firstSym&&firstSym.id);
+    }catch(e){}
+    [].forEach.call(document.querySelectorAll('.maplibregl-ctrl-attrib'),function(e){e.classList.remove('maplibregl-compact-show');});
+    apply3D();
+    fitPts(shown());
+  }
+  function mapFail(){ map=null; $('#map').innerHTML='<p class="mapfail">地圖載入失敗，請確認網路連線後重新整理。<br>行程、記錄表與導航按鈕仍可使用。</p>'; snap('half'); }
+
+  if(typeof maplibregl==='undefined'){ mapFail(); }
+  else try{
+    map=new maplibregl.Map({container:'map',style:'https://tiles.openfreemap.org/styles/liberty',center:[127.69,26.214],zoom:13.5,pitch:55,bearing:-18,maxPitch:75,attributionControl:false});
+    map.addControl(new maplibregl.AttributionControl({compact:true}),'top-right');
+    geo=new maplibregl.GeolocateControl({positionOptions:{enableHighAccuracy:true},trackUserLocation:true,showUserHeading:true,showAccuracyCircle:true,fitBoundsOptions:{maxZoom:16.5}});
+    map.addControl(geo,'bottom-right');
+    map.on('load',setup);
+    map.once('idle',function(){ [].forEach.call(document.querySelectorAll('.maplibregl-ctrl-attrib'),function(e){e.classList.remove('maplibregl-compact-show');}); });
+    map.on('error',function(e){ if(window.console) console.warn(e&&e.error); });
+    map.on('click',function(e){ var t=e.originalEvent&&e.originalEvent.target; if(t&&t.closest&&t.closest('.mk')) return; if(sel){ select(null); } });
+    PTS.forEach(function(p){
+      var el=document.createElement('button'); el.type='button'; el.className='mk'; el.style.setProperty('--dc',DC[p.d]);
+      el.setAttribute('aria-label','Day '+p.d+' 第 '+p.n+' 站 '+p.name);
+      el.innerHTML='<span class="nm">'+esc(p.name)+'</span><span class="pin">'+p.n+'</span>';
+      el.addEventListener('click',function(ev){ ev.stopPropagation(); select(p.k,false); if(cur==='full') snap('peek'); });
+      MK[p.k]=new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat([p.lng,p.lat]).addTo(map);
+      el.setAttribute('aria-label','Day '+p.d+' 第 '+p.n+' 站 '+p.name);
+    });
+    var lf=$('#floc');
+    geo.on('geolocate',function(e){ me=[e.coords.longitude,e.coords.latitude]; lf.classList.remove('wait'); lf.classList.add('on'); updateDist(); });
+    geo.on('trackuserlocationstart',function(){ lf.classList.add('on'); });
+    geo.on('trackuserlocationend',function(){ lf.classList.remove('on'); });
+    geo.on('error',function(e){ lf.classList.remove('wait','on');
+      toast(e&&e.code===1?'定位被拒絕了。請到手機或瀏覽器設定，允許這個網站使用位置。':'暫時抓不到位置，請到戶外或稍後再試。'); });
+  }catch(e){ mapFail(); }
+
+  $('#floc').addEventListener('click',function(){
+    if(!geo){ toast('地圖沒有載入，無法顯示位置。'); return; }
+    if(!navigator.geolocation){ toast('這個瀏覽器不支援定位。'); return; }
+    if(!me) this.classList.add('wait');
+    try{ geo.trigger(); }catch(e){ toast('地圖還在載入，請稍候再按一次。'); this.classList.remove('wait'); }
+  });
+  $('#f3d').addEventListener('click',function(){ is3D=!is3D; apply3D(); });
+  $('#fall').addEventListener('click',function(){ fitPts(shown()); });
+
+  /* ---------- 起始 ---------- */
+  setTab('trip'); setDay(day,false); progress(); snap('peek');
+  requestAnimationFrame(function(){ snap('peek'); });
 })();
 </script>
 </body>
